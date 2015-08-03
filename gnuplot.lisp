@@ -9,9 +9,11 @@
   "Имена переменных для использования при создании осредняющих функций 
 при помощи make-func-polynom-fit")
 
-(defparameter *point-type-open* '(1 2 3 4 6 8 10 12 14))
-(defparameter *point-type-close* '(5 7 9 11 13 15))
-(defparameter *point-type* '(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
+(defparameter *point-type-clear* '(1 2 3 4 6 8 10 12 14))
+
+(defparameter *point-type-fill* '(5 7 9 11 13 15))
+
+(defparameter *point-type* (append *point-type-clear* *point-type-fill*))
 
 (defparameter *tbl*
   '((0 0.0 0.0 0.0 5.0)
@@ -132,29 +134,76 @@
   "Функция для генерации одиночной осредняющей кривой
 Пример использования:
 input  - \"input.txt\";
-x-nom  - от 1 до n;
-y-nom  - от 1 до n;
+x-nom  - от 0 до n-1;
+y-nom  - от 0 до n-1;
 stepen - степень полинома;
 (make-func-polynom-fit \"input.txt\" 1 3 6)
 "
-  (format out "f_~A_~A(x) = ~A~%" x-nom y-nom
+;;;;(make-func-polynom-fit "input.txt" 1 3 6)
+  (format out "f_~A_~A(x) = ~A~%" (+ x-nom 1) (+ y-nom 1)
 	  (let ((str "")
-		(ind (format nil "_~A_~A" x-nom y-nom))
+		(ind (format nil "_~A_~A" (+ x-nom 1) (+ y-nom 1)))
 		)
 	    (dolist (i (make-int-range 0 stepen) (string-right-trim " +" str) )
 	      (cond
 		((= i 0) (setf str (concatenate 'string str (nth i *const-names*) ind " + " )))
 		((= i 1) (setf str (concatenate 'string str (nth i *const-names*) ind "*x + " )))
 		(t       (setf str (concatenate 'string str (nth i *const-names*) ind "*x**" (format nil "~A" i) " + " )))))))
-  (format out "fit f_~A_~A(x) \"~A\" using ~A:~A via ~A" x-nom y-nom input x-nom y-nom
+  (format out "fit f_~A_~A(x) \"~A\" using ~A:~A via ~A" (+ x-nom 1) (+ y-nom 1) input (+ x-nom 1) (+ y-nom 1)
 	  (let ((str "")
-		(ind (format nil "_~A_~A" x-nom y-nom)))
+		(ind (format nil "_~A_~A" (+ x-nom 1) (+ y-nom 1))))
 	    (dolist (i (make-int-range 0 stepen) (string-right-trim " ," str))
 	      (setf str (concatenate 'string str (nth i *const-names*) ind "," )))))
+  (format out "~%")
   (get-output-stream-string out))
 
+(defun out-func-polynom-fit (file-name lst stepen)
+  "Пример использования
+  (out-func-polynom-fit \"1_CO_NOX-t04.txt\" '(0 (2 3)) 6)
+"
+;;;;(out-func-polynom-fit "1_CO_NOX-t04.txt" '(0 (2 3)) 6)
+  (let ( (out (make-string-output-stream)))
+    (mapc
+     #'(lambda(el)
+	 (format out "~A" 
+		 (make-func-polynom-fit file-name (car lst) el stepen)))
+     (second lst))
+    (get-output-stream-string out)))
+
+(defun out-plot(data-file lst ht-labels
+		&key (axis nil) (point-type *point-type*) (line-type -1) (line-width 3))
+  "
+data-file - строка, представляющая имя файла в котором находятся данные;
+lst       - список, содержащий номера колонок, предназначенные для вывода (x0 (y0 ... yn-1))
+нумерация начинается с нуля;
+ht-labels    - хеш таблица, содержащая имена переменных
+Пример использования:
+(out-plot \"1_CO_NOX-t04.txt\" '(0 (2  4 5)) *tbl-labes-hash*  :axis \"x1y1\" :point-type *point-type-fill*)
+"
+  (let ((pt 0)				  ; номер точки
+	(out (make-string-output-stream)) ; поток для вывода
+	)
+    (mapc
+     #'(lambda(el)
+	 (format out "~%\"~A\" " data-file)
+	 (format out "using ~A:~A"  (+ (first lst) 1) (+ el 1))
+	 (if axis (format out " axis ~A" axis))
+	 (if point-type (format out " pt ~A" (nth pt point-type)))
+	 (if line-type (format out " lt ~A" line-type)) 
+	 (format out "  title \"~A\"" (gethash el ht-labels))
+	 (format out ", ")
+	 (format out "f_~A_~A(x)"  (+ (first lst) 1) (+ el 1))
+	 (if axis (format out " axis ~A" axis))
+ 	 (if line-type (format out " lt ~A" line-type))
+	 (if line-width (format out " lw ~A" line-width))
+	 (format out " title \"\"" )
+	 (format out ",\\")
+	 (if (>= (incf pt) (length point-type)) (setf pt 0)))
+     (second lst))
+  (string-right-trim "\\," (get-output-stream-string out))))
+
 (defun make-plot (table			;
-		  lables		;
+		  ht-labels		;
 		  &key
 		    (x1y1 '(1 (2)))
 		    (x1y2 nil)
@@ -176,10 +225,11 @@ stepen - степень полинома;
 		    (point-type *point-type*)
 		    (line-type -1)
 		    (line-width 3)
+		    (stepen 5)
 		    )
   "
 table         - прямоугольная таблица со значениями;
-lables        - метки со значениями;
+ht-labels        - метки со значениями;
 x1y1          - перечень графиков для вывода на осях x1 y1 (x (y_1 y_2 ... y_n));
 x1y2          - перечень графиков для вывода на осях x1 y2 (x (y_1 y_2 ... y_n));
 xrange        - отображаемый диапазон по шкале x;
@@ -198,7 +248,7 @@ output        - имя файла для помещения результато
 title         - заголовок для графика - строка;
 out           - поток вывода результатов работы функции;
 Пример использования:
-(make-plot *tbl* *tbl-labes* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
+(make-plot *tbl* *tbl-labes-hash* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
 ;;;;(with-output-to-string (out) (format out \"hello, world \") (format out \"~s\" (list 1 2 3))) 
 "
   (format out "set terminal ~A size ~A~A,~A~A~%"
@@ -226,66 +276,21 @@ out           - поток вывода результатов работы фу
   (format out "~%")
   (if mxtics (format out "set mxtics ~A~%" mxtics))
   (if mytics (format out "set mytics ~A~%" mytics))
+;;;;
+  (if x1y1 (format out (out-func-polynom-fit output x1y1 stepen)))
+  (if x1y2 (format out (out-func-polynom-fit output x1y2 stepen)))
   (format out "~%")
   (if x1y1
       (progn
 	(format out "plot\\")
-	(format out "~A" (out-plot output x1y1 lables))))
+	(format out "~A" (out-plot output x1y1 ht-labels :line-type line-type :line-width line-width))))
   (cond
     ((and x1y2 (null x1y1))
      (format out "plot\\")
-     (format out "~A" (out-plot output x1y2 lables :axis "x1y2")))
+     (format out "~A" (out-plot output x1y2 ht-labels :axis "x1y2" :line-type line-type :line-width line-width)))
     ((and x1y2 x1y1)
      (format out ",\\")
-     (format out "~A" (out-plot output x1y2 lables :axis "x1y2"))))
-;;;;(make-func-polynom-fit \"input.txt\" 1 3 6)
+     (format out "~A" (out-plot output x1y2 ht-labels :axis "x1y2" :line-type line-type :line-width line-width))))
   (format t "~A"(get-output-stream-string out)))
 
-;;;;(make-plot *tbl* *tbl-labes* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
-
-(defun out-plot(file-name
-		lst
-		lables
-		&key
-		  (out (make-string-output-stream))
-		  (axis nil)
-		  (point-type *point-type*)
-		  (line-type -1)
-		  (line-width 3)
-		  )
-  (let ((pt 0))
-    (mapc
-     #'(lambda(el)
-	 (format out "~%\"~A\" " file-name)
-	 (format out "using ~A:~A"  (+ (first lst) 1) (+ el 1))
-	 (if axis (format out " axis ~A" axis))
-	 (if point-type (format out " pt ~A" (nth pt point-type)))
-	 (if line-type (format out " lt ~A" line-type)) 
-	 (format out "  title \"~A\"" (gethash el *tbl-labes-hash*))
-	 (format out ", ")
-	 (format out "f_~A_~A(x)"  (+ (first lst) 1) (+ el 1))
-	 (if axis (format out " axis ~A" axis))
- 	 (if line-type (format out " lt ~A" line-type))
-	 (if line-width (format out " lw ~A" line-width))
-	 (format out " title \"\"" )
-	 (format out ",\\")
-	 (if (>= (incf pt) (length point-type)) (setf pt 0)))
-     (second lst)))
-;;;;
-  (string-right-trim "\\," (get-output-stream-string out))
-  )
-
-(out-plot "1_CO_NOX-t04.txt" '(0 (2 3 4 5 6 7 8 9)) *tbl-labes*  :axis "x1y1" :point-type *point-type-close*)
-
-plot   '1_CO_NOX-t04.txt' using 1:2 axis x1y2 pt 20 lt -1 title "CO", f1(x) axis x1y2 lt -1 lw 3 dt 1 title "",\
-
-plot
-"1_CO_NOX-t04.txt"using 1:3 axis x1y1 pt 5 lt -1  title "y_2", f_1_3(x) axis x1y1 lt -1 lw 3 title "",\
-"1_CO_NOX-t04.txt"using 1:4 axis x1y1 pt 7 lt -1  title "y_3", f_1_4(x) axis x1y1 lt -1 lw 3 title "",\
-"1_CO_NOX-t04.txt"using 1:5 axis x1y1 pt 9 lt -1  title "y_4", f_1_5(x) axis x1y1 lt -1 lw 3 title "",\
-"1_CO_NOX-t04.txt"using 1:6 axis x1y1 pt 11 lt -1  title "NIL", f_1_6(x) axis x1y1 lt -1 lw 3 title "",\
-"1_CO_NOX-t04.txt"using 1:7 axis x1y1 pt 13 lt -1  title "NIL", f_1_7(x) axis x1y1 lt -1 lw 3 title "",\
-"1_CO_NOX-t04.txt"using 1:8 axis x1y1 pt 15 lt -1  title "NIL", f_1_8(x) axis x1y1 lt -1 lw 3 title "",\
-"1_CO_NOX-t04.txt"using 1:9 axis x1y1 pt 5 lt -1  title "NIL", f_1_9(x) axis x1y1 lt -1 lw 3 title "",\
-"1_CO_NOX-t04.txt"using 1:10 axis x1y1 pt 7 lt -1  title "NIL", f_1_10(x) axis x1y1 lt -1 lw 3 title ""
 
