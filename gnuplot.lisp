@@ -171,16 +171,17 @@ stepen - степень полинома;
     (get-output-stream-string out)))
 
 (defun out-plot(data-file lst ht-labels
-		&key (axis nil) (point-type *point-type*) (line-type -1) (line-width 3))
+		&key (axis nil) (point-type *point-type*) (point-scale 2) (line-type -1) (line-width 3) (point-type-number 0))
   "
-data-file - строка, представляющая имя файла в котором находятся данные;
-lst       - список, содержащий номера колонок, предназначенные для вывода (x0 (y0 ... yn-1))
-нумерация начинается с нуля;
-ht-labels    - хеш таблица, содержащая имена переменных
+data-file         - строка, представляющая имя файла в котором находятся данные;
+lst               - список, содержащий номера колонок, предназначенные для вывода (x0 (y0 ... yn-1))
+                    нумерация начинается с нуля;
+ht-labels         - хеш таблица, содержащая имена переменных
+point-type-number - 
 Пример использования:
-(out-plot \"1_CO_NOX-t04.txt\" '(0 (2  4 5)) *tbl-labes-hash*  :axis \"x1y1\" :point-type *point-type-fill*)
+(out-plot \"1_CO_NOX-t04.txt\" '(0 (2  4 5)) *tbl-labes-hash*  :axis \"x1y1\" :point-type *point-type-fill* :point-type-number 3)
 "
-  (let ((pt 0)				  ; номер точки
+  (let ((pt point-type-number)		  ; номер точки
 	(out (make-string-output-stream)) ; поток для вывода
 	)
     (mapc
@@ -189,7 +190,9 @@ ht-labels    - хеш таблица, содержащая имена перем
 	 (format out "using ~A:~A"  (+ (first lst) 1) (+ el 1))
 	 (if axis (format out " axis ~A" axis))
 	 (if point-type (format out " pt ~A" (nth pt point-type)))
-	 (if line-type (format out " lt ~A" line-type)) 
+         (if point-scale (format out " ps ~A" point-scale))
+	 (if line-type (format out " lt ~A" line-type))
+	 (if line-width (format out " lw ~A" line-width))
 	 (format out "  title \"~A\"" (gethash el ht-labels))
 	 (format out ", ")
 	 (format out "f_~A_~A(x)"  (+ (first lst) 1) (+ el 1))
@@ -200,7 +203,7 @@ ht-labels    - хеш таблица, содержащая имена перем
 	 (format out ",\\")
 	 (if (>= (incf pt) (length point-type)) (setf pt 0)))
      (second lst))
-  (string-right-trim "\\," (get-output-stream-string out))))
+    (values (string-right-trim "\\," (get-output-stream-string out)) pt)))
 
 (defun make-plot (table			;
 		  ht-labels		;
@@ -216,7 +219,7 @@ ht-labels    - хеш таблица, содержащая имена перем
 		    (tics "out")
 		    (tics-scale '(2 1))
 		    (terminal "pdfcairo")
-		    (terminal-size '(15 15))
+		    (terminal-size '(30 30))
 		    (terminal-unit "cm")
 		    (key "below")
 		    (output "gp")
@@ -226,6 +229,7 @@ ht-labels    - хеш таблица, содержащая имена перем
 		    (line-type -1)
 		    (line-width 3)
 		    (stepen 5)
+		    (point-number 3)
 		    )
   "
 table         - прямоугольная таблица со значениями;
@@ -251,46 +255,54 @@ out           - поток вывода результатов работы фу
 (make-plot *tbl* *tbl-labes-hash* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
 ;;;;(with-output-to-string (out) (format out \"hello, world \") (format out \"~s\" (list 1 2 3))) 
 "
-  (format out "set terminal ~A size ~A~A,~A~A~%"
-	  terminal
-	  (first terminal-size )
-	  terminal-unit
-	  (second terminal-size )
-	  terminal-unit)
-  (format out "set output \"~A.pdf\"~%" output)
-  (format out "~%")
-  (if key (format out "set key ~A~%" key))
-  (if title (format out "set title \"~A\"~%" title))
-  (format out "~%")
-  (if xrange  (format out "set xrange  ~A~%"  xrange))
-  (if yrange  (format out "set yrange  ~A~%"  yrange))
-  (if x2range (format out "set x2range ~A~%"  x2range))
-  (if y2range (format out "set y2range ~A~%"  y2range))
-  (format out "~%")
-  (if tics (format out "set tics ~A~%" tics))
-  (if tics-scale (format out "set tics scale ~A,~A~%"
-			 (first tics-scale) (second tics-scale)))
-  (format out "~%")
-  (format out "set xtics nomirror~%")
-  (format out "set ytics nomirror~%")
-  (format out "~%")
-  (if mxtics (format out "set mxtics ~A~%" mxtics))
-  (if mytics (format out "set mytics ~A~%" mytics))
+  (let ((str-pt '("" 2)))
+    (format out "set terminal ~A size ~A~A,~A~A~%"
+	    terminal
+	    (first terminal-size )
+	    terminal-unit
+	    (second terminal-size )
+	    terminal-unit)
+    (format out "set output \"~A.pdf\"~%" output)
+    (format out "~%")
+    (if key (format out "set key ~A~%" key))
+    (if title (format out "set title \"~A\"~%" title))
+    (format out "~%")
+    (if xrange  (format out "set xrange  ~A~%"  xrange))
+    (if yrange  (format out "set yrange  ~A~%"  yrange))
+    (if x2range (format out "set x2range ~A~%"  x2range))
+    (if y2range (format out "set y2range ~A~%"  y2range))
+    (format out "~%")
+    (if tics (format out "set tics ~A~%" tics))
+    (if tics-scale (format out "set tics scale ~A,~A~%"
+			   (first tics-scale) (second tics-scale)))
+    (format out "~%")
+    (format out "set xtics nomirror~%")
+    (format out "set ytics nomirror~%")
+    (format out "~%")
+    (if mxtics (format out "set mxtics ~A~%" mxtics))
+    (if mytics (format out "set mytics ~A~%" mytics))
 ;;;;
-  (if x1y1 (format out (out-func-polynom-fit output x1y1 stepen)))
-  (if x1y2 (format out (out-func-polynom-fit output x1y2 stepen)))
-  (format out "~%")
-  (if x1y1
-      (progn
-	(format out "plot\\")
-	(format out "~A" (out-plot output x1y1 ht-labels :line-type line-type :line-width line-width))))
-  (cond
-    ((and x1y2 (null x1y1))
-     (format out "plot\\")
-     (format out "~A" (out-plot output x1y2 ht-labels :axis "x1y2" :line-type line-type :line-width line-width)))
-    ((and x1y2 x1y1)
-     (format out ",\\")
-     (format out "~A" (out-plot output x1y2 ht-labels :axis "x1y2" :line-type line-type :line-width line-width))))
-  (format t "~A"(get-output-stream-string out)))
+    (if x1y1 (format out (out-func-polynom-fit output x1y1 stepen)))
+    (if x1y2 (format out (out-func-polynom-fit output x1y2 stepen)))
+    (format out "~%")
+    (if x1y1
+	(progn
+	  (format out "plot\\")
+	  (setf str-pt (multiple-value-list
+			(out-plot output x1y1 ht-labels :line-type line-type :line-width line-width :point-type-number (cadr str-pt))))
+	  (format out "~A" (car str-pt))))
+    (cond
+      ((and x1y2 (null x1y1))
+       (format out "plot\\")
+       (setf str-pt (multiple-value-list
+		     (out-plot output x1y2 ht-labels :axis "x1y2" :line-type line-type :line-width line-width :point-type-number (cadr str-pt))))
+       (format out "~A" (car str-pt)))
+      ((and x1y2 x1y1)
+       (format out ",\\")
+       (setf str-pt (multiple-value-list
+		     (out-plot output x1y2 ht-labels :axis "x1y2" :line-type line-type :line-width line-width :point-type-number (cadr str-pt))))
+       (format out "~A" (car str-pt))))
+    (format t "~A"(get-output-stream-string out))))
 
 
+(make-plot *tbl* *tbl-labes-hash* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
