@@ -237,7 +237,7 @@ point-type-number -
 		    (line-type -1)
 		    (line-width 3)
 		    (stepen 5)
-		    (point-number 3)
+		    (point-number 0)
 		    )
   "
 table         - прямоугольная таблица со значениями;
