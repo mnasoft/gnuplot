@@ -11,6 +11,10 @@
    *point-type-all*
    )
   (:export
+   *tbl*
+   *tbl-labes-hash*
+   )
+  (:export
    make-hash-table-lables
    format-n-string
    extract

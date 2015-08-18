@@ -43,13 +43,31 @@
     (4 "y_4"  "s^2")))
 
 (defun make-hash-table-lables(lables)
+  "
+Создает хеш-таблицу с 
+- ключами являющимися номерами колонок в таблице, содержащей данные для построения графиков (нумерация начинается с 0);
+- значениями - строками, отображаемыми как подписи к графикам
+;;;;
+Параметры:
+lables - список каждым элементом которого является список следующего вида:
+(номер_столбца строка_для_подписи строка_для_размерности)
+;;;;
+Пример использования:
+(make-hash-table-lables
+  '((0 \"x_1\" \"s\")
+    (1 \"s_1\" \"m\")
+    (2 \"v_1\" \"m/s\")
+    (3 \"a_1\" \"m/(s^2)\")))
+"
   (let ((ht (make-hash-table)))
     (mapc #'(lambda (el) (setf (gethash (first el) ht)
 			       (second el)))
 	  lables)
     ht))
 
-(defparameter  *tbl-labes-hash* (make-hash-table-lables *tbl-labes*))
+(defparameter  *tbl-labes-hash* (make-hash-table-lables *tbl-labes*)
+ "Пример хеш таблицы описания имен параметров
+" )
 
 (defun format-n-string(n &key (str-format "~A") (str-delimiter " "))
   "Формирует строку для использования с функцией format
