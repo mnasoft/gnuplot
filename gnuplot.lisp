@@ -98,11 +98,18 @@ lables - список каждым элементом которого явля�
 		 (make-int-list col-number-list)))
 	    val-list))
 
-(defun out-list(lst  &key (out t) (str-format "~A") (str-delimiter " "))
+(defun out-list(table  &key (out t) (str-format "~A") (str-delimiter " "))
+  "Выводит список lst в поток out, используя:
+- формат вывода данных str-format;
+- разделитель элементов списка str-delimiter
+;;;;
+Пример использования
+(out-list '((1 2 3)(4 5 6 ) (7 8) (9)))
+"
   (mapcar
    #'(lambda (el)
        (apply #'format out (format-n-string (length el) :str-format str-format :str-delimiter str-delimiter) el))
-   lst)
+   table)
   t)
 
 (defun filter(table &optional (test #'(lambda (el) t)))
