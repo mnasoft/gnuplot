@@ -98,13 +98,13 @@ lables - список каждым элементом которого явля�
 		 (make-int-list col-number-list)))
 	    val-list))
 
-(defun out-list(table  &key (out t) (str-format "~A") (str-delimiter " "))
+(defun out-table(table  &key (out t) (str-format "~A") (str-delimiter " "))
   "Выводит список lst в поток out, используя:
 - формат вывода данных str-format;
 - разделитель элементов списка str-delimiter
 ;;;;
 Пример использования
-(out-list '((1 2 3)(4 5 6 ) (7 8) (9)))
+(out-table '((1 2 3)(4 5 6 ) (7 8) (9)))
 "
   (mapcar
    #'(lambda (el)
@@ -112,7 +112,7 @@ lables - список каждым элементом которого явля�
    table)
   t)
 
-(defun filter(table &optional (test #'(lambda (el) t)))
+(defun filter(table &optional (test #'(lambda (el)(if el t t))))
   "Выполняет фильтрацию строк из таблицы по определенному критерию,
 задаваемому в функции test
 Функция test принимает обин аргумент - список, состоящий из строки таблицы table
@@ -146,10 +146,9 @@ lables - список каждым элементом которого явля�
   (apply #'append
 	 (mapcar
 	  #'(lambda (lst)
-	      (let ((rez nil))
 		(cond
 		  ((listp lst) (make-int-range (first lst) (second lst)))
-		  ((numberp lst) (list lst)))))
+		  ((numberp lst) (list lst))))
 	  n-lst)))
 
 (defun make-int-range (from to)
@@ -296,7 +295,7 @@ title         - заголовок для графика - строка;
         (fn-txt (concatenate 'string output ".txt"))
         (fn-gnuplot (concatenate 'string output ".gnuplot")))
     (with-open-file (f-out fn-txt :direction :output :if-exists :overwrite :if-does-not-exist :create)
-      (out-list table :out f-out))
+      (out-table table :out f-out))
     (format out "set terminal ~A fontscale ~A size ~A~A,~A~A~%"
 	    terminal
             terminal-fontscale

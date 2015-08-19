@@ -18,7 +18,7 @@
    make-hash-table-lables
    format-n-string
    extract
-   out-list
+   out-table
    filter
    make-int-list
    make-int-range
