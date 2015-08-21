@@ -6,5 +6,6 @@
   :license "Specify license here"
   :serial t
   :components ((:file "package")
-               (:file "gnuplot")))
-
+	       (:file "point-types")
+               (:file "gnuplot")
+	       (:file "test")))

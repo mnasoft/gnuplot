@@ -9,42 +9,9 @@
   "Имена переменных для использования при создании осредняющих функций 
 при помощи make-func-polynom-fit")
 
-(defparameter *point-type-open* ' (1 2 3 ))
-
-(defparameter *point-type-box* '(8 4 6 10 12 14))
-
-(defparameter *point-type-fill* '(9 5 7 11 13 15))
-
-(defparameter *point-type-box-fill* (apply #'append
-					   (mapcar #'list *point-type-box* *point-type-fill*)))
-
-(defparameter *point-type-fill-box* (apply #'append
-					   (mapcar #'list *point-type-fill* *point-type-box*)))
-
-(defparameter *point-type-all* (append *point-type-box* *point-type-fill* *point-type-open*))
-
-(defparameter *tbl*
-  '((0 0.0 0.0 0.0 5.0)
-    (1 1.0 0.1 0.01 9.207355)
-    (2 1.4142135 0.4 0.08 9.546487)
-    (3 1.7320508 0.90000004 0.26999998 5.7056)
-    (4 2.0 1.6 0.64 1.2159874)
-    (5 2.236068 2.5 1.2499999 0.20537853)
-    (6 2.4494898 3.6000001 2.1599998 3.6029224)
-    (7 2.6457512 4.9 3.43 8.284933)
-    (8 2.828427 6.4 5.12 9.946791)
-    (9 3.0 8.1 7.2899995 7.0605927)))
-
-(defparameter  *tbl-labes*
-  '((0 "x_1" "мм^2")
-    (1 "y_1" "s^2")
-    (2 "y_2" "s^2")
-    (3 "y_3"  "s^2")
-    (4 "y_4"  "s^2")))
 
 (defun make-hash-table-lables(lables)
-  "
-Создает хеш-таблицу с 
+  "Создает хеш-таблицу с 
 - ключами являющимися номерами колонок в таблице, содержащей данные для построения графиков (нумерация начинается с 0);
 - значениями - строками, отображаемыми как подписи к графикам
 ;;;;
@@ -64,10 +31,6 @@ lables - список каждым элементом которого явля�
 			       (second el)))
 	  lables)
     ht))
-
-(defparameter  *tbl-labes-hash* (make-hash-table-lables *tbl-labes*)
- "Пример хеш таблицы описания имен параметров
-" )
 
 (defun format-n-string(n &key (str-format "~A") (str-delimiter " "))
   "Формирует строку для использования с функцией format
@@ -286,16 +249,21 @@ key           - место расположения подписей - below|...
 output        - имя файла для помещения результатов работы -  gp;
 title         - заголовок для графика - строка;
 Пример использования:
-(make-plot *tbl* *tbl-labes-hash* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
+(make-plot gnuplot:*tbl* gnuplot:*tbl-labes-hash* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
 ;;;;(with-output-to-string (out) (format out \"hello, world \") (format out \"~s\" (list 1 2 3))) 
 "
   (let ((str-pt (list "" point-number))
 	(out (make-string-output-stream)) ; поток вывода результатов работы функции
         (fn-pdf (concatenate 'string output ".pdf"))
         (fn-txt (concatenate 'string output ".txt"))
-        (fn-gnuplot (concatenate 'string output ".gnuplot")))
+        (fn-gnuplot (concatenate 'string output ".gnuplot"))
+	(f-txt nil)
+        (f-gnuplot nil)
+	)
     (with-open-file (f-out fn-txt :direction :output :if-exists :overwrite :if-does-not-exist :create)
-      (out-table table :out f-out))
+      (out-table table :out f-out)
+      (setf f-txt (uiop:file-pathname-p f-out))
+      )
     (format out "set terminal ~A fontscale ~A size ~A~A,~A~A~%"
 	    terminal
             terminal-fontscale
@@ -346,8 +314,14 @@ title         - заголовок для графика - строка;
        (format out "~A" (car str-pt))))
     (format out "~%set grid xtics ytics mxtics mytics lt -1 lw 3, lt -1 lw 1")
     (format out "~%~%set output \"~A\"\; replot\; set output \"0.pdf\"" fn-pdf)
-    (with-open-file (f-out fn-gnuplot :direction :output :if-exists :overwrite :if-does-not-exist :create)
+    (with-open-file
+	(f-out fn-gnuplot :direction :output :if-exists :overwrite :if-does-not-exist :create)
       (format f-out "~A"(get-output-stream-string out))
-      (format f-out "~A"(get-output-stream-string out)))))
+      (setf f-gnuplot (uiop:file-pathname-p f-out))
+      )
+    (values f-gnuplot f-txt)
+    ))
 
-;;;;(make-plot *tbl* *tbl-labes-hash* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
+ 
+
+

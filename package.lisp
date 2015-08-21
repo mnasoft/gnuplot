@@ -11,8 +11,9 @@
    *point-type-all*
    )
   (:export
-   *tbl*
-   *tbl-labes-hash*
+   *test-tbl*
+   *test-labes-list*
+   *test-hash-lables*
    )
   (:export
    make-hash-table-lables
