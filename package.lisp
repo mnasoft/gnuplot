@@ -11,6 +11,9 @@
    *point-type-all*
    )
   (:export
+   *color-names*
+   )
+  (:export
    *test-tbl*
    *test-labes-list*
    *test-hash-lables*
