@@ -32,3 +32,19 @@
 *test-tbl*
 *test-labes-list*
 *test-hash-lables*
+
+(make-plot
+ '((2 370 365 310 295 290)
+   (8 450 442 350 330 320)
+   (20 610 570 435 380 350))
+ (make-hash-table-lables
+  '((0 "Q" "kW")
+    (1 "t_1" "K")
+    (2 "t_2" "K")
+    (3 "t_3" "K")
+    (4 "t_4" "K")
+    (5 "t_5" "K")))
+ :x1y1 '(0 (1 2 3 4 5))
+ :stepen 2  
+ )
+
