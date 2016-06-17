@@ -271,6 +271,7 @@ title         - заголовок для графика - строка;
 	    terminal-unit
 	    (second terminal-size )
 	    terminal-unit)
+    (format out "set termoption enhanced~%")
     (format out "set output \"~A\"~%" fn-pdf)
     (format out "~%")
     (if key (format out "set key ~A~%" key))
@@ -317,11 +318,5 @@ title         - заголовок для графика - строка;
     (with-open-file
 	(f-out fn-gnuplot :direction :output :if-exists :overwrite :if-does-not-exist :create)
       (format f-out "~A"(get-output-stream-string out))
-      (setf f-gnuplot (uiop:file-pathname-p f-out))
-      )
-    (values f-gnuplot f-txt)
-    ))
-
- 
-
-
+      (setf f-gnuplot (uiop:file-pathname-p f-out)))
+    (values f-gnuplot f-txt))) 
