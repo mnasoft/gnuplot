@@ -219,6 +219,7 @@ point-type-number -
 		    (terminal-fontscale 1)
 		    (key "below")
 		    (output "gp")
+		    (output-path "~/")
 		    (title "GnuPlot Graph")
 		    (point-type *point-type-all*)
 		    (line-type -1)
@@ -249,14 +250,14 @@ key           - место расположения подписей - below|...
 output        - имя файла для помещения результатов работы -  gp;
 title         - заголовок для графика - строка;
 Пример использования:
-(make-plot gnuplot:*tbl* gnuplot:*tbl-labes-hash* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
+;;;;(make-plot gnuplot:*tbl* gnuplot:*tbl-labes-hash* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
 ;;;;(with-output-to-string (out) (format out \"hello, world \") (format out \"~s\" (list 1 2 3))) 
 "
   (let ((str-pt (list "" point-number))
 	(out (make-string-output-stream)) ; поток вывода результатов работы функции
-        (fn-pdf (concatenate 'string output ".pdf"))
-        (fn-txt (concatenate 'string output ".txt"))
-        (fn-gnuplot (concatenate 'string output ".gnuplot"))
+        (fn-pdf (concatenate 'string output-path output ".pdf"))
+        (fn-txt (concatenate 'string output-path output ".txt"))
+        (fn-gnuplot (concatenate 'string output-path output ".gnuplot"))
 	(f-txt nil)
         (f-gnuplot nil)
 	)
