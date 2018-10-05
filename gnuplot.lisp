@@ -219,7 +219,7 @@ point-type-number -
 		    (terminal-fontscale 1)
 		    (key "below")
 		    (output "gp")
-		    (output-path "~/")
+		    (output-path "")
 		    (title "GnuPlot Graph")
 		    (point-type *point-type-all*)
 		    (line-type -1)
@@ -294,8 +294,8 @@ title         - заголовок для графика - строка;
     (if mytics (format out "set mytics ~A~%" mytics))
     (format out "~%")
 ;;;;
-    (if x1y1 (format out (out-func-polynom-fit fn-txt x1y1 stepen)))
-    (if x1y2 (format out (out-func-polynom-fit fn-txt x1y2 stepen)))
+    (if x1y1 (format out "~A~%" (out-func-polynom-fit fn-txt x1y1 stepen)))
+    (if x1y2 (format out "~A~%" (out-func-polynom-fit fn-txt x1y2 stepen)))
     (format out "~%")
     (if x1y1
 	(progn

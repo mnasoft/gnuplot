@@ -1,35 +1,37 @@
 ;;;; package.lisp
 
+(defpackage #:gnuplot)
+
 (defpackage #:gnuplot
   (:use #:cl)
   (:export
-   *point-type-open* 
-   *point-type-box*
-   *point-type-fill*
-   *point-type-box-fill*
-   *point-type-fill-box*
-   *point-type-all*
+   gnuplot::*point-type-open* 
+   gnuplot::*point-type-box*
+   gnuplot::*point-type-fill*
+   gnuplot::*point-type-box-fill*
+   gnuplot::*point-type-fill-box*
+   gnuplot::*point-type-all*
    )
   (:export
-   *color-names*
+   gnuplot::*color-names*
    )
   (:export
-   *test-tbl*
-   *test-labes-list*
-   *test-hash-lables*
+   gnuplot::*test-tbl*
+   gnuplot::*test-labes-list*
+   gnuplot::*test-hash-lables*
    )
   (:export
-   make-hash-table-lables
-   format-n-string
-   extract
-   out-table
-   filter
-   make-int-list
-   make-int-range
-   make-func-polynom-fit
-   out-func-polynom-fit
-   out-plot
-   make-plot
+   gnuplot::make-hash-table-lables
+   gnuplot::format-n-string
+   gnuplot::extract
+   gnuplot::out-table
+   gnuplot::filter
+   gnuplot::make-int-list
+   gnuplot::make-int-range
+   gnuplot::make-func-polynom-fit
+   gnuplot::out-func-polynom-fit
+   gnuplot::out-plot
+   gnuplot::make-plot
    )
   )
 

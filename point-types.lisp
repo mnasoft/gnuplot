@@ -4,7 +4,7 @@
 
 ;;; "gnuplot" goes here. Hacks and glory await!
 
-(defparameter *point-type-open* ' (1 2 3 )
+(defparameter *point-type-open* '(1 2 3)
  "Содержит номера точек открытых типов:
 1 - +
 2 - x
