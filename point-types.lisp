@@ -2,14 +2,16 @@
 
 (in-package #:gnuplot)
 
-;;; "gnuplot" goes here. Hacks and glory await!
+(annot:enable-annot-syntax)
 
+@export
 (defparameter *point-type-open* '(1 2 3)
  "Содержит номера точек открытых типов:
 1 - +
 2 - x
 3 - *" )
 
+@export
 (defparameter *point-type-box* '(8 4 6 10 12 14)
   "Содержит имена точек закрытых типов:
 8  - треугольник вершина вверх;
@@ -19,6 +21,7 @@
 12 - ромб;
 14 - пятиугольник")
 
+@export
 (defparameter *point-type-fill* '(9 5 7 11 13 15)
   "Содержит имена точек закрытых типов с заливкой:
 9  - залитый треугольник вершина вверх;
@@ -28,6 +31,7 @@
 13 - залитый ромб;
 15 - залитый пятиугольник")
 
+@export
 (defparameter *point-type-box-fill*
   (apply #'append
 	 (mapcar #'list *point-type-box* *point-type-fill*))
@@ -40,6 +44,7 @@
 пятиугольник,               залитый пятиугольник
 ")
 
+@export
 (defparameter *point-type-fill-box*
   (apply #'append
 	 (mapcar #'list *point-type-fill* *point-type-box*))
@@ -52,6 +57,7 @@
 залитый пятиугольник,               пятиугольник
 ")
 
+@export
 (defparameter *point-type-all* (append *point-type-box* *point-type-fill* *point-type-open*)
   "Содержит точки всех типов
 Точки идут в следующем порядке:

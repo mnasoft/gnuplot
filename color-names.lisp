@@ -2,7 +2,7 @@
 
 (in-package #:gnuplot)
 
-;;; "gnuplot" goes here. Hacks and glory await!
+(annot:enable-annot-syntax)
 
 (defparameter *color-names-list*
   '(("white"              #xffffff)
@@ -117,6 +117,8 @@
     ("gray90"             #xe5e5e5)
     ("gray100"            #xffffff)))
 
-(defparameter *color-names* (make-hash-table :test #'equal))
+@export
+(defparameter *color-names* (make-hash-table :test #'equal)
+  "Поределяет соответствие между именем цвета и его RGB-значением.")
 
 (mnas-hash-table:add-items *color-names* *color-names-list* 0 1)
