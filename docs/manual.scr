@@ -1,14 +1,50 @@
 @begin(section)
-@title(Overview)
+@title(Обзор)
 
-This is where you explain what your project does.
+Определяет некоторые функции для построения графиков с использованием программы gnuplot.
 
 @end(section)
 
 @begin(section)
-@title(API Reference)
-
-And this is where you list your project's functionality. Read the tutorial to
-learn how to do this.
-
+@title(Графы)
+@begin(list)
+ @item(system-graph @image[src=./system-graph.gv.png]())
+ @item(call-graph   @image[src=./call-graph.gv.png]())
+ @item(symbol-graph @image[src=./symbol-graph.gv.png]())
+ @item(class-graph  @image[src=./class-graph.gv.png]())
+@end(list)
 @end(section)
+
+@begin(section)
+@title(Переменные)
+@cl:with-package[name="gnuplot"](
+ @cl:doc(variable *color-names*)
+ @cl:doc(variable *point-type-all*)
+ @cl:doc(variable *point-type-box*)
+ @cl:doc(variable *point-type-box-fill*)
+ @cl:doc(variable *point-type-fill*)
+ @cl:doc(variable *point-type-fill-box*)
+ @cl:doc(variable *point-type-open*)
+ @cl:doc(variable *test-hash-lables*)
+ @cl:doc(variable *test-labes-list*)
+ @cl:doc(variable *test-tbl*))
+@end(section)
+
+@begin(section)
+@title(Функции)
+@cl:with-package[name="gnuplot"](
+ @cl:doc(function extract)
+ @cl:doc(function filter)
+ @cl:doc(function format-n-string)
+ @cl:doc(function make-func-polynom-fit)
+ @cl:doc(function make-hash-table-lables)
+ @cl:doc(function make-int-list)
+ @cl:doc(function make-int-range)
+ @cl:doc(function make-plot)
+ @cl:doc(function out-func-polynom-fit)
+ @cl:doc(function out-plot)
+ @cl:doc(function out-table )
+)
+@end(section)
+
+

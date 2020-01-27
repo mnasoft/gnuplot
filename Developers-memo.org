@@ -1,0 +1,40 @@
+* Операции git  [[file:~/org/sbcl/Git-memo.org][Git-memo.org]]
+
+* Генерирование документации при помощи Codex
+ [[file:~/org/sbcl/codex.org][Codex]]
+ http://commondoc.github.io/codex/docs/tutorial.html
+
+** Генерирование документации
+
+#+name: pwd
+#+BEGIN_SRC shell
+pwd
+#+END_SRC
+
+#+name: basename-pwd
+#+BEGIN_SRC shell
+basename `pwd`
+#+END_SRC
+
+#+BEGIN_SRC lisp :var pwd=pwd :var basename-pwd=basename-pwd
+  ;;;; (require :codex)
+  ;;;; (require :mnas-package)
+  ;;;;
+  ;;;; (require :gnuplot)
+  (let ((pkg :gnuplot)
+	(fpath (concatenate
+		'string
+		(cond ((uiop:getenv "MSYS_HOME")) (t ""))
+		pwd "/docs/build/"
+		basename-pwd "/html/")))
+    (codex:document pkg)
+    (mnas-package:package-call-graph   pkg :out-type "png" :viewer nil :fpath fpath :fname "call-graph")
+    (mnas-package:package-system-graph pkg :out-type "png" :viewer nil :fpath fpath :fname "system-graph")
+    (mnas-package:package-class-graph  pkg :out-type "png" :viewer nil :fpath fpath :fname "class-graph")
+    (mnas-package:package-symbol-graph pkg :out-type "png" :viewer nil :fpath fpath :fname "symbol-graph"))
+#+END_SRC
+
+#+RESULTS:
+: #GRAPH(VC=12 RC=3)
+: (T:"out-plot" T:"make-plot" T:"make-func-polynom-fit" T:"*point-type-fill-box*" T:"*point-type-open*" T:"*point-type-all*" T:"*point-type-fill*" T:"*color-names*" T:"*point-type-box-fill*" T:"*point-type-box*" T:"*const-names*" T:"*color-names-list*" )
+: ((T:"out-plot"->T:"*point-type-all*") (T:"make-plot"->T:"*point-type-all*") (T:"make-func-polynom-fit"->T:"*const-names*") ))

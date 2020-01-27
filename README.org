@@ -1,1 +1,55 @@
-This is the stub README.txt for the "gnuplot" project.
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+OPTIONS: author:t broken-links:nil c:nil creator:nil
+#+OPTIONS: d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t num:t
+#+OPTIONS: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+OPTIONS: timestamp:t title:t toc:t todo:t |:t
+#+TITLE: GNUPLOT
+#+DATE: <2020-01-26 Вс>
+#+AUTHOR:
+#+EMAIL: mnasoftv@gmail.com
+#+LANGUAGE: ru
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.3 (Org mode 9.1.9)
+
+* Назначение
+Определяет некоторые функции для построения графиков с использованием программы gnuplot.
+
+* Документация 
+ [[file:docs/build/gnuplot/html/%D0%BE%D0%B1%D0%B7%D0%BE%D1%80.html][обзор.html]]
+
+* Примеры
+
+#+BEGIN_SRC lisp
+(defparameter *test-tbl*
+  '((0 0.0 0.0 0.0 5.0)
+    (1 1.0 0.1 0.01 9.207355)
+    (2 1.4142135 0.4 0.08 9.546487)
+    (3 1.7320508 0.90000004 0.26999998 5.7056)
+    (4 2.0 1.6 0.64 1.2159874)
+    (5 2.236068 2.5 1.2499999 0.20537853)
+    (6 2.4494898 3.6000001 2.1599998 3.6029224)
+    (7 2.6457512 4.9 3.43 8.284933)
+    (8 2.828427 6.4 5.12 9.946791)
+    (9 3.0 8.1 7.2899995 7.0605927))
+  "Содержит таблицу для построения тестовых графиков.")
+
+(defparameter  *test-labes-list*
+  '((0 "t_1" "s")
+    (1 "S_1" "m")
+    (2 "V_1" "m/s")
+    (3 "A_1" "m/(s^2)")
+    (4 "Y_1" "m/(s^3)"))
+  "Содержит тестовый набор меток.")
+
+(defparameter  *test-hash-lables* (gnuplot:make-hash-table-lables *test-labes-list*)
+ "Пример хеш таблицы, содержащей описания имен параметров." )
+
+(gnuplot:make-plot *test-tbl* *test-hash-lables* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
+#+END_SRC
+
+#+BEGIN_SRC shell
+cd 
+gnuplot -c "gp.gnuplot"
+#+END_SRC
+
