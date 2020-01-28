@@ -1,4 +1,4 @@
-;;;; gnuplot_01.lisp
+;;;; set-xtics.lisp
 
 (in-package #:gnuplot)
 
