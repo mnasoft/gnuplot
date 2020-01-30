@@ -10,5 +10,6 @@
 	       (:file "point-types")
                (:file "gnuplot")
 	       (:file "color-names")
+	       (:file "set")	       
 ;;; (:file "test")
 	       ))

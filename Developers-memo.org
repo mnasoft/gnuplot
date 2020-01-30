@@ -36,5 +36,5 @@ basename `pwd`
 
 #+RESULTS:
 : #GRAPH(VC=12 RC=3)
-: (T:"make-plot" T:"out-plot" T:"make-func-polynom-fit" T:"*point-type-fill*" T:"*point-type-open*" T:"*point-type-fill-box*" T:"*color-names*" T:"*point-type-box*" T:"*point-type-box-fill*" T:"*point-type-all*" T:"*const-names*" T:"*color-names-list*" )
-: ((T:"make-plot"->T:"*point-type-all*") (T:"out-plot"->T:"*point-type-all*") (T:"make-func-polynom-fit"->T:"*const-names*") ))
+: (T:"out-plot" T:"make-plot" T:"make-func-polynom-fit" T:"*point-type-fill-box*" T:"*point-type-open*" T:"*point-type-all*" T:"*point-type-fill*" T:"*color-names*" T:"*point-type-box-fill*" T:"*point-type-box*" T:"*color-names-list*" T:"*const-names*" )
+: ((T:"out-plot"->T:"*point-type-all*") (T:"make-plot"->T:"*point-type-all*") (T:"make-func-polynom-fit"->T:"*const-names*") ))
