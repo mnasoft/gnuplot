@@ -148,7 +148,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
- set:
+"
+   set:
     angles            arrow             autoscale         bars
     bmargin           border            boxwidth          cbdata
     cbdtics           cblabel           cbmtics           cbrange
@@ -185,12 +186,16 @@
     yrange            ytics             yzeroaxis         zdata
     zdtics            zero              zeroaxis          zlabel
     zmtics            zrange            ztics             zzeroaxis
+"
 
 
 
-
-gnuplot
-help xtics
+(defun help-*tics (&optional (stream t))
+  "Помощь по командам gnuplot:
+set xtics, set ytics, set ztics, set x2tics, set y2tics 
+  "
+  (format stream "
+ help xtics
  Fine control of the major (labeled) tics on the x axis is possible with the
  `set xtics` command.  The tics may be turned off with the `unset xtics`
  command, and may be turned on (the default state) with `set xtics`.  Similar
@@ -208,16 +213,15 @@ help xtics
                  {  autofreq
                   | <incr>
                   | <start>, <incr> {,<end>}
-                  | ({"<label>"} <pos> {<level>} {,{"<label>"}...) }
-                 {format "formatstring"}
-                 {font "name{,<size>}"}
+                  | ({\"<label>\"} <pos> {<level>} {,{\"<label>\"}...) }
+                 {format \"formatstring\"}
+                 {font \"name{,<size>}\"}
                  {{no}enhanced}
                  { numeric | timedate | geographic }
                  { rangelimited }
                  { textcolor <colorspec> }
        unset xtics
        show xtics
-
 
  The same syntax applies to `ytics`, `ztics`, `x2tics`, `y2tics` and `cbtics`.
 
@@ -311,13 +315,13 @@ help xtics
        set logscale x; set xtics 1,100,1e8
 
 
- The explicit ("<label>" <pos> <level>, ...) form allows arbitrary tic
+ The explicit (\"<label>\" <pos> <level>, ...) form allows arbitrary tic
  positions or non-numeric tic labels.  In this form, the tics do not
  need to be listed in numerical order.  Each tic has a
  position, optionally with a label.  Note that the label is
  a string enclosed by quotes.  It may be a constant string, such as
- "hello", may contain formatting information for converting the
- position into its label, such as "%3f clients", or may be empty, "".
+ \"hello\", may contain formatting information for converting the
+ position into its label, such as \"%3f clients\", or may be empty, \"\".
  See `set format` for more information.  If no string is given, the
  default label (numerical) is used.
 
@@ -330,11 +334,11 @@ help xtics
  level is controlled by the command `set tics scale`.
 
  Examples:
-       set xtics ("low" 0, "medium" 50, "high" 100)
+       set xtics (\"low\" 0, \"medium\" 50, \"high\" 100)
        set xtics (1,2,4,8,16,32,64,128,256,512,1024)
-       set ytics ("bottom" 0, "" 10, "top" 20)
+       set ytics (\"bottom\" 0, \"\" 10, \"top\" 20)
 
-       set ytics ("bottom" 0, "" 10 1, "top" 20)
+       set ytics (\"bottom\" 0, \"\" 10 1, \"top\" 20)
 
  In the second example, all tics are labeled.  In the third, only the end
  tics are labeled.  In the fourth, the unlabeled tic is a minor tic.
@@ -347,7 +351,7 @@ help xtics
 
  Example:
        set xtics 0,.5,10
-       set xtics add ("Pi" 3.14159)
+       set xtics add (\"Pi\" 3.14159)
 
  This will automatically generate tic marks every 0.5 along x, but will
  also add an explicit labeled tic mark at pi.
@@ -355,20 +359,134 @@ help xtics
  However they are specified, tics will only be plotted when in range.
 
  Format (or omission) of the tic labels is controlled by `set format`, unless
- the explicit text of a label is included in the `set xtics ("<label>")` form.
+ the explicit text of a label is included in the `set xtics (\"<label>\")` form.
 
  Minor (unlabeled) tics can be added automatically by the `set mxtics`
- command, or at explicit positions by the `set xtics ("" <pos> 1, ...)` form.
+ command, or at explicit positions by the `set xtics (\"\" <pos> 1, ...)` form.
 
  The appearance of the tics (line style, line width etc.) is determined by the
  border line (see `set border`), even if the tics are drawn at the axes.
 
 Subtopics available for xtics:
-    rangelimited      timedata
+    rangelimited      timedata"
+	  ))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@annot.doc:doc
+"@b(Описание:) valid-offset проверяет правильность фомата смещения подписи к засечкам.
+ 
+ @b(Пример использования:)
+ @begin[lang=lisp](code)
+ (valid-offset '(2 1)) => T
+ (valid-offset '(2 1 5)) => T
+ (valid-offset '((:first . 2) (:second . 1) (:graph . 5)))  => T
+ (valid-offset '((:screen . 2) (:character . 1))) => T
+ (valid-offset '(1)) => NIL
+ (valid-offset '(1 2 3 4)) =>NIL
+ @end(code)
 
-| 59.4 | 1164 | 1223 | 1359 | 1528 | 1717 | 1911 | 1929 | 2155 | 2339 | 3890 | 4220 | 4404 | 4588 | 4735 | 4882 | 5362 | 6251 | 6399 | 6436 | 6492 | 6587 | 6642 | 6773 | 6794 | 6828 |
+ @b(gnuplot:) 
+ Смещение <offset> может быть задано в виде x,y или x,y,z.
+ Каждая из координат может предваряться словами `first`, `second`, 
+ `graph`, `screen` или `character` для указания системы координат.
+ <offset> является смещением текста засечки от его расположения по-умолчанию.
+ Системой координат поумолчанию является `character`.
+ `nooffset` switches off the offset.
 
-1,091	1,060	1,032	0,9922	0,9829	1,067	1,040	0,9819	0,8881
+ Example:
+ @b(Пример использования:)
+
+ @begin[lang=lisp](gnuplot)
+ #Перемещает xtics более плотно к графику. 
+       set xtics offset 0,graph 0.05
+ @end(code)
+"
+(defun valid-offset (offset)
+  (labels ((cons-with-key-number (key-lst)
+	     (lambda (var)
+	       (or (numberp var)
+		   (and
+		    (consp var)
+		    (member (car var) key-lst)
+		    (numberp (cdr var)))))))
+    (and (every (cons-with-key-number '(:first :second :graph :screen :character)) offset)
+	 (<= 2 (length offset) 3))))
+
+(defun valid-step-freq (step-freq)
+  
+  )
+
+@export
+@annot.doc:doc
+" Syntax:
+       set xtics {axis | border} 
+                 {{no}mirror}
+                 {in | out}
+                 {scale {default | <major> {,<minor>}}}
+                 {{no}rotate {by <ang>}} 
+                 {offset <offset> | nooffset}
+                 {left | right | center | autojustify}
+                 {add}
+                 {  autofreq
+                  | <incr>
+                  | <start>, <incr> {,<end>}
+                  | ({\"<label>\"} <pos> {<level>} {,{\"<label>\"}...) }
+                 {format \"formatstring\"}
+                 {font \"name{,<size>}\"}
+                 {{no}enhanced}
+                 { numeric | timedate | geographic }
+                 { rangelimited }
+                 { textcolor <colorspec> }
+       unset xtics
+       show xtics"
+(defun set-*tics (axis
+		  &key
+		    (stream t) axis-border mirror in-out scale rotate
+		    offset
+		    justify 
+		    enhanced
+                    numeric-timedate-geographic
+		    rangelimited
+		    step
+		    label
+		    )
+  (assert (member axis '(:x :y :z :x2 :y2 :cb)))
+  (assert (member axis-border '(nil :axis :border)))
+  (assert (member mirror      '(nil :no-mirror :mirror)))
+  (assert (member in-out      '(nil :in :out)))
+  (assert (or (member offset  '(nil :no-offset )) (valid-offset offset )))
+  (assert (member justify     '(nil :left :right :center :autojustify)))
+  (assert (member step-freq   '(nil :auto-freq)))
+  
+;;;;
+  (assert (member enhanced    '(nil :no-enhanced :enhanced )))
+  (assert (member numeric-timedate-geographic '(nil :numeric :timedate :geographic )))
+  (assert (member rangelimited '(nil :rangelimited )))
+  
+  (assert (or (member scale   '(nil :scale :scale-default ) :test #'eq)
+	      (numberp scale)
+	      (and (consp scale)
+		   (numberp (first scale))
+		   (numberp (second scale)))))
+  (assert (or (member rotate '(nil :no-rotate :rotate) :test #'eq)
+              (numberp rotate)))
+  (format stream "set ~Atics" (symbol-string axis))
+  (symbols->stream stream axis-border mirror in-out
+		   
+		   justify
+		   
+		   enhanced numeric-timedate-geographic rangelimited)
+  (when (eq offset :no-offset) (symbols->stream stream offset))
+  (when (valid-offset offset)
+    (format t " ~{~A~^, ~}"
+	(mapcar #'(lambda (el)
+		    (cond
+		      ((numberp el) (format nil "~A" el))
+		      ((consp   el) (format nil "~A ~A" (symbol-string (car el)) (cdr el)))))
+		offset))))
+
+(set-*tics :y2 :enhanced :no-enhanced :numeric-timedate-geographic :timedate :rangelimited :rangelimited )
+(set-*tics :x :justify :right)
+(set-*tics :x :offset '(1 (:first . 2) 3))
+
+
