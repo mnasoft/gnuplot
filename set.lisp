@@ -592,13 +592,53 @@ Subtopics available for xtics:
     (and (every (cons-with-key-number '(:first :second :graph :screen :character)) offset)
 	 (<= 2 (length offset) 3))))
 
+@annot.doc:doc
+"@b(Пример использования:)
+@begin[lang=lisp](code)
+ (valid-step-freq :autofreq) => nil
+ (valid-step-freq '(1 . 2))  =>  [Condition of type TYPE-ERROR]
+ (valid-step-freq 10)        => T
+ (valid-step-freq '(10.0 20.0 110.0))  => T
+ (valid-step-freq '(10.0 20.0 )) => T
+@end(code)
+"
 (defun valid-step-freq (step-freq)
-  
-  )
+  (cond
+    ((numberp step-freq))        ;;;; <incr>
+    ((and (consp step-freq)      ;;;; <start>, <incr> {,<end>}
+	  (every #'numberp step-freq)
+	  (<= 2 (length step-freq) 3)))))
+
+(defun valid-labels (labels)
+  (cond
+    ((and (consp labels)
+	  (every
+	   #'(lambda (el) (and (stringp (first el)) (numberp (second el))))
+	   labels)))))
 
 @export
 @annot.doc:doc
-" Syntax:
+"@b(Описание:) set-*tics выполняет формирование засечек и их подписей.
+ 
+ @b(Пример использования:)
+@begin[lang=lisp](code)
+ (set-*tics :y2 :enhanced :no-enhanced :numeric-timedate-geographic 
+            :timedate :rangelimited :rangelimited ) => set y2tics noenhanced timedate rangelimited
+ (set-*tics :x :justify :right)             => set xtics right
+ (set-*tics :x :offset '(1 (:first . 2) 3)) => set xtics offset 1, first 2, 3
+ (set-*tics :x :step-freq '(5 2 ))          => set xtics 5, 2
+ (set-*tics :x :add :add :step-freq '(5 2 ) :labels '((\"q\" 1.333) (\"s\" 1.66))) 
+            => set xtics add 5, 2 (\"q\" 1.333, \"s\" 1.66)
+ (set-*tics :x :rotate -15.0  )
+ (set-*tics :x :scale :default)   => set xtics scale default
+ (set-*tics :x :scale 1.5)        => set xtics scale 1.5
+ (set-*tics :x :scale '(1.5 1.0)) => set xtics scale 1.5, 1.0
+ (set-*tics :x :format \"%.2f\")  => set xtics format \"%.2f\"
+ (set-*tics :x :font '("Times" 10) )
+@end(code)
+
+@b(Описание:) gnuplot.
+ Syntax:
        set xtics {axis | border} 
                  {{no}mirror}
                  {in | out}
@@ -623,12 +663,13 @@ Subtopics available for xtics:
 		  &key
 		    (stream t) axis-border mirror in-out scale rotate
 		    offset
-		    justify 
+		    justify add
+		    step-freq
+		    labels
+		    format font
 		    enhanced
                     numeric-timedate-geographic
 		    rangelimited
-		    step-freq
-		    label
 		    )
   (assert (member axis '(:x :y :z :x2 :y2 :cb)))
   (assert (member axis-border '(nil :axis :border)))
@@ -636,37 +677,61 @@ Subtopics available for xtics:
   (assert (member in-out      '(nil :in :out)))
   (assert (or (member offset  '(nil :no-offset )) (valid-offset offset )))
   (assert (member justify     '(nil :left :right :center :autojustify)))
-  (assert (member step-freq   '(nil :auto-freq)))
-  
+  (assert (member add         '(nil :add)))
+  (assert (or (member step-freq   '(nil :auto-freq)) (valid-step-freq step-freq)))
 ;;;;
   (assert (member enhanced    '(nil :no-enhanced :enhanced )))
   (assert (member numeric-timedate-geographic '(nil :numeric :timedate :geographic )))
   (assert (member rangelimited '(nil :rangelimited )))
-  
-  (assert (or (member scale   '(nil :scale :scale-default ) :test #'eq)
+  (assert (or (null labels) (valid-labels labels)))
+  (assert (or (null format) (stringp format)))
+  (assert (or (null font) (stringp font)
+	      (and (consp font)
+		   (stringp (first font))
+		   (numberp (second font)))))
+  (assert (or (member scale '(nil :scale :default ))
 	      (numberp scale)
 	      (and (consp scale)
 		   (numberp (first scale))
 		   (numberp (second scale)))))
-  (assert (or (member rotate '(nil :no-rotate :rotate) :test #'eq)
+  (assert (or (member rotate '(nil :no-rotate :rotate))
               (numberp rotate)))
   (format stream "set ~Atics" (symbol-string axis))
-  (symbols->stream stream axis-border mirror in-out
-		   
-		   justify
-		   
-		   enhanced numeric-timedate-geographic rangelimited)
-  (when (eq offset :no-offset) (symbols->stream stream offset))
-  (when (valid-offset offset)
-    (format t " ~{~A~^, ~}"
-	(mapcar #'(lambda (el)
-		    (cond
-		      ((numberp el) (format nil "~A" el))
-		      ((consp   el) (format nil "~A ~A" (symbol-string (car el)) (cdr el)))))
-		offset))))
-
-(set-*tics :y2 :enhanced :no-enhanced :numeric-timedate-geographic :timedate :rangelimited :rangelimited )
-(set-*tics :x :justify :right)
-(set-*tics :x :offset '(1 (:first . 2) 3))
-
-
+  (symbols->stream stream axis-border mirror in-out)
+  (block scale
+    (when (member scale '(:default)) (format stream " scale ~A" (symbol-string scale)))
+    (when (numberp scale)            (format stream " scale ~A" scale))
+    (when (and (consp scale)
+	       (numberp (first scale))
+	       (numberp (second scale)))
+      (format stream " scale ~A, ~A" (first scale) (second scale))))
+  (block rotate
+    (when (member rotate '(:no-rotate :rotate)) (symbols->stream stream rotate))
+    (when (numberp rotate) (format stream  " rotate by ~A" rotate)))
+  (block offset
+    (when (eq offset :no-offset) (symbols->stream stream offset))
+    (when (valid-offset offset)
+      (format t " offset ~{~A~^, ~}"
+	      (mapcar #'(lambda (el)
+			  (cond
+			    ((numberp el) (format nil "~A" el))
+			    ((consp   el) (format nil "~A ~A" (symbol-string (car el)) (cdr el)))))
+		      offset))))
+  (symbols->stream stream justify add)
+  (block step-freq
+    (when (eq step-freq :autofreq) (symbols->stream stream step-freq))
+    (when (numberp step-freq)      (format stream " ~A" step-freq))
+    (when (and (consp step-freq)      
+	       (every #'numberp step-freq)
+	       (<= 2 (length step-freq) 3))
+      (format t " ~{~A~^, ~}" step-freq))
+    (when labels (format t " (~{~{~S ~A~}~^, ~})" labels)))
+  (when (stringp format) (format t " format ~S" format))
+  (when (stringp font) (format t " font ~S" font))
+  (when (and (consp font)
+	     (stringp (first font))
+	     (numberp (second font)))
+    (format t " font \"~A,~A\"" (first font) (second font)))
+  (symbols->stream stream enhanced numeric-timedate-geographic rangelimited)
+  ;;;; { textcolor <colorspec> }
+  )
