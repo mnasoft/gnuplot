@@ -609,12 +609,35 @@ Subtopics available for xtics:
 	  (every #'numberp step-freq)
 	  (<= 2 (length step-freq) 3)))))
 
-(defun valid-labels (labels)
+(defun valid-labels (label)
   (cond
-    ((and (consp labels)
+    ((and (consp label)
 	  (every
 	   #'(lambda (el) (and (stringp (first el)) (numberp (second el))))
-	   labels)))))
+	   label)))))
+
+@annot.doc:doc
+"@b(Описание:) valid-colorspec проверка на корректность.
+
+ @b(Пример использования:)
+@begin[lang=lisp](code)
+ (valid-colorspec \"red\")           => T
+ (valid-colorspec \"reda\")          => NIL
+ (valid-colorspec '(30 30 20))       => T
+ (valid-colorspec '(45 30 30 20))    => T
+ (valid-colorspec '( 30 20))         => NIL
+ (valid-colorspec '(45 65 20 30 20)) => NI
+@end(code)
+"
+(defun valid-colorspec (colorspec)
+  (cond
+    ((and (stringp  colorspec) (gethash colorspec *color-names*) T))
+    ((and (integerp colorspec) (<= 0 #xffFFffFF)) T)
+    ((and (consp colorspec) (<= 3 (length colorspec) 4)
+	  (every
+	   #'(lambda (el)
+	       (and (integerp el) (<= 0 el #xff)))
+	   colorspec)))))
 
 @export
 @annot.doc:doc
@@ -634,7 +657,9 @@ Subtopics available for xtics:
  (set-*tics :x :scale 1.5)        => set xtics scale 1.5
  (set-*tics :x :scale '(1.5 1.0)) => set xtics scale 1.5, 1.0
  (set-*tics :x :format \"%.2f\")  => set xtics format \"%.2f\"
- (set-*tics :x :font '("Times" 10) )
+ (set-*tics :x :font '(\"Times\" 10) ) => set xtics font \"Times,10\" 
+ (set-*tics :x :in-out :out :font '(\"Times New Roman\" 15) :textcolor '(0 150 145)) =>
+set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
 @end(code)
 
 @b(Описание:) gnuplot.
@@ -670,6 +695,7 @@ Subtopics available for xtics:
 		    enhanced
                     numeric-timedate-geographic
 		    rangelimited
+		    textcolor
 		    )
   (assert (member axis '(:x :y :z :x2 :y2 :cb)))
   (assert (member axis-border '(nil :axis :border)))
@@ -696,6 +722,7 @@ Subtopics available for xtics:
 		   (numberp (second scale)))))
   (assert (or (member rotate '(nil :no-rotate :rotate))
               (numberp rotate)))
+  (assert (or (member textcolor '(nil)) (valid-colorspec textcolor)))
   (format stream "set ~Atics" (symbol-string axis))
   (symbols->stream stream axis-border mirror in-out)
   (block scale
@@ -711,7 +738,7 @@ Subtopics available for xtics:
   (block offset
     (when (eq offset :no-offset) (symbols->stream stream offset))
     (when (valid-offset offset)
-      (format t " offset ~{~A~^, ~}"
+      (format stream " offset ~{~A~^, ~}"
 	      (mapcar #'(lambda (el)
 			  (cond
 			    ((numberp el) (format nil "~A" el))
@@ -724,14 +751,90 @@ Subtopics available for xtics:
     (when (and (consp step-freq)      
 	       (every #'numberp step-freq)
 	       (<= 2 (length step-freq) 3))
-      (format t " ~{~A~^, ~}" step-freq))
-    (when labels (format t " (~{~{~S ~A~}~^, ~})" labels)))
-  (when (stringp format) (format t " format ~S" format))
-  (when (stringp font) (format t " font ~S" font))
+      (format stream " ~{~A~^, ~}" step-freq))
+    (when labels         (format stream " (~{~{~S ~A~}~^, ~})" labels)))
+  (when (stringp format) (format stream " format ~S" format))
+  (when (stringp font) (format stream " font ~S" font))
   (when (and (consp font)
 	     (stringp (first font))
 	     (numberp (second font)))
-    (format t " font \"~A,~A\"" (first font) (second font)))
+    (format stream " font \"~A,~A\"" (first font) (second font)))
   (symbols->stream stream enhanced numeric-timedate-geographic rangelimited)
-  ;;;; { textcolor <colorspec> }
-  )
+  (when (stringp textcolor) (format stream " textcolor ~S" textcolor))
+  (when (integerp textcolor) (format stream " textcolor \"0x~2,'0X\"" textcolor))
+  (when (consp textcolor) (format stream " textcolor \"0x~{~2,'0X~}\"" textcolor)))
+
+
+
+		    
+@export
+@annot.doc:doc
+"  
+ Many commands allow you to specify a linetype with an explicit color.
+
+ Syntax:
+
+       ... {linecolor | lc} {\"colorname\" | <colorspec> | <n>}
+       ... {textcolor | tc} {<colorspec> | {linetype | lt} <n>}
+
+ where <colorspec> has one of the following forms:
+
+       rgbcolor \"colorname\"    # e.g. \"blue\"
+       rgbcolor \"0xRRGGBB\"     # string containing hexadecimal constant
+       rgbcolor \"0xAARRGGBB\"   # string containing hexadecimal constant
+       rgbcolor \"#RRGGBB\"      # string containing hexadecimal in x11 format
+       rgbcolor \"#AARRGGBB\"    # string containing hexadecimal in x11 format
+       rgbcolor <integer val>  # integer value representing AARRGGBB
+       rgbcolor variable       # integer value is read from input file
+       palette frac <val>      # <val> runs from 0 to 1
+       palette cb <value>      # <val> lies within cbrange
+       palette z
+       variable                # color index is read from input file
+       bgnd                    # background color
+       black
+
+ The \"<n>\" is the linetype number the color of which is used, see `test`.
+
+ \"colorname\" refers to one of the color names built in to gnuplot. For a list
+ of the available names, see `show colornames`.
+
+ Hexadecimal constants can be given in quotes as \"#RRGGBB\" or \"0xRRGGBB\", where
+ RRGGBB represents the red, green, and blue components of the color and must be
+ between 00 and FF.  For example, magenta = full-scale red + full-scale blue
+ could be represented by \"0xFF00FF\", which is the hexadecimal representation of
+ (255 << 16) + (0 << 8) + (255).
+
+ \"#AARRGGBB\" represents an RGB color with an alpha channel (transparency) 
+ value in the high bits. An alpha value of 0 represents a fully opaque color;
+ i.e., \"#00RRGGBB\" is the same as \"#RRGGBB\".  An alpha value of 255 (FF)
+ represents full transparency. `Note`: This convention for the alpha channel
+ is backwards from that used by the \"with rgbalpha\" image plot mode in earlier
+ versions of gnuplot.
+
+ The color palette is a linear gradient of colors that smoothly maps a
+ single numerical value onto a particular color.  Two such mappings are always
+ in effect. `palette frac`  maps a fractional value between 0 and 1 onto the
+Press return for more: 
+ full range of the color palette.  `palette cb` maps the range of the color
+ axis onto the same palette.  See `set cbrange`.  See also `set colorbox`.
+ You can use either of these to select a constant color from the current
+ palette.
+
+ \"palette z\" maps the z value of each plot segment or plot element into the
+ cbrange mapping of the palette. This allows smoothly-varying color along a
+ 3d line or surface. It also allows coloring 2D plots by palette values read
+ from an extra column of data (not all 2D plot styles allow an extra column).
+ There are two special color specifiers: `bgnd` for background color and `black`."
+(defun help-colorspec (&optional (stream t))
+  (format stream "~a"  (documentation 'help 'function)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+"set terminal ~A fontscale ~A size ~A~A,~A~A~%"
+"set termoption enhanced~%"
+"set output \"~A\"~%"
+"set key ~A~%"
+"set title \"~A\"~%"
+"set xrange  ~A~%"
+"set tics ~A~%"
+"set mxtics ~A~%"
