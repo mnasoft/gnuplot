@@ -10,6 +10,7 @@
 	       (:file "point-types")
                (:file "gnuplot")
 	       (:file "color-names")
-	       (:file "set")	       
+	       (:file "set") 
+               (:file "help") 
 ;;; (:file "test")
 	       ))
