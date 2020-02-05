@@ -4,11 +4,25 @@
 
 (annot:enable-annot-syntax)
 
-(defun symbol-string (sym)
-  (mnas-string:replace-all (string-downcase (symbol-name sym)) "-" ""))
+(defun symbol-string (sym &key (print-case :downcase))
+  (mnas-string:replace-all
+   (mnas-string:replace-all 
+    (ecase print-case
+      (:downcase   (string-downcase   (symbol-name sym)))
+      (:upcase     (string-upcase     (symbol-name sym)))
+      (:capitalize (string-capitalize (symbol-name sym))))
+    "-" "")
+   "_" " "))
 
 (defun symbols->stream (stream &rest rest)
-  (map nil (lambda (el) (when el (format stream " ~A" (symbol-string el)))) rest))
+  (map nil (lambda (el)
+	     (when el (format stream " ~A" (symbol-string el))))
+       rest))
+
+(defun symbols->stream-capitalize (stream &rest rest)
+  (map nil (lambda (el)
+	     (when el (format stream " ~A" (symbol-string el :print-case :capitalize))))
+       rest))
 
 @export
 @annot.doc:doc
@@ -173,6 +187,83 @@
     (and (every (cons-with-key-number '(:first :second :graph :screen :character)) offset)
 	 (<= 2 (length offset) 3))))
 
+@export
+@annot.doc:doc
+"
+ This section describes placement of the primary, auto-generated key.
+ To construct a secondary key or place plot titles elsewhere, see
+ `multiple keys`.
+
+ To understand positioning, the best concept is to think of a region, i.e.,
+ inside/outside, or one of the margins.  Along with the region, keywords
+ `left/center/right` (l/c/r) and `top/center/bottom` (t/c/b) control where
+ within the particular region the key should be placed.
+
+ When in `inside` mode, the keywords `left` (l), `right` (r), `top` (t),
+ `bottom` (b), and `center` (c) push the key out toward the plot boundary as
+ illustrated:
+
+      t/l   t/c   t/r
+
+      c/l    c    c/r
+
+      b/l   b/c   b/r
+
+ When in `outside` mode, automatic placement is similar to the above
+ illustration, but with respect to the view, rather than the graph boundary.
+ That is, a border is moved inward to make room for the key outside of
+ the plotting area, although this may interfere with other labels and may
+ cause an error on some devices.  The particular plot border that is moved
+ depends upon the position described above and the stacking direction.  For
+ options centered in one of the dimensions, there is no ambiguity about which
+ border to move.  For the corners, when the stack direction is `vertical`, the
+ left or right border is moved inward appropriately.  When the stack direction
+ is `horizontal`, the top or bottom border is moved inward appropriately.
+
+ The margin syntax allows automatic placement of key regardless of stack
+ direction.  When one of the margins `lmargin` (lm), `rmargin` (rm),
+ `tmargin` (tm), and `bmargin` (bm) is combined with a single, non-conflicting
+ direction keyword, the following illustrated positions may contain the key:
+
+           l/tm  c/tm  r/tm
+
+      t/lm                  t/rm
+
+      c/lm                  c/rm
+
+      b/lm                  b/rm
+
+           l/bm  c/bm  r/bm
+
+ Keywords `above` and `over` are synonymous with `tmargin`.  For version
+ compatibility, `above` or `over` without an additional l/c/r or stack direction
+ keyword uses `center` and `horizontal`.  Keywords `below` and `under` are
+ synonymous with `bmargin`.  For compatibility, `below` or `under` without an
+ additional l/c/r or stack  direction keyword uses `center` and `horizontal`.  A
+ further compatibility issue is that `outside` appearing without an additional
+ t/b/c or stack direction keyword uses `top`, `right` and `vertical` (i.e., the
+ same as t/rm above).
+
+ The <position> can be a simple x,y,z as in previous versions, but these can
+ be preceded by one of five keywords (`first`, `second`, `graph`, `screen`,
+ `character`) which selects the coordinate system in which the position of
+ the first sample line is specified.  See `coordinates` for more details.
+ The effect of `left`, `right`, `top`, `bottom`, and `center` when <position>
+ is given is to align the key as though it were text positioned using the
+ label command, i.e., `left` means left align with key to the right of
+ <position>, etc.
+"
+(defun valid-position (position)
+  (labels ((cons-with-key-number (key-lst)
+	     (lambda (var)
+	       (or (numberp var)
+		   (and
+		    (consp var)
+		    (member (car var) key-lst)
+		    (numberp (cdr var)))))))
+    (and (every (cons-with-key-number '(:first :second :graph :screen :character)) position)
+	 (<= 2 (length position) 3))))
+
 @annot.doc:doc
 "@b(Пример использования:)
 @begin[lang=lisp](code)
@@ -225,6 +316,18 @@
       (and (consp font)
 	   (stringp (first font))
 	   (numberp (second font)))))
+
+(defun print-font (font &optional (stream t))
+  (when (stringp font) (format stream " font ~S" font))
+  (when (and (consp font)
+	     (stringp (first font))
+	     (numberp (second font)))
+    (format stream " font \"~A,~A\"" (first font) (second font))))
+
+(defun print-textcolor (textcolor &optional (stream t))
+  (when (stringp textcolor) (format stream " textcolor ~S" textcolor))
+  (when (integerp textcolor) (format stream " textcolor \"0x~2,'0X\"" textcolor))
+  (when (consp textcolor) (format stream " textcolor \"0x~{~2,'0X~}\"" textcolor)))
 
 @export
 @annot.doc:doc
@@ -341,23 +444,9 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
       (format stream " ~{~A~^, ~}" step-freq))
     (when labels         (format stream " (~{~{~S ~A~}~^, ~})" labels)))
   (when (stringp format) (format stream " format ~S" format))
-  (when (stringp font) (format stream " font ~S" font))
-  (when (and (consp font)
-	     (stringp (first font))
-	     (numberp (second font)))
-    (format stream " font \"~A,~A\"" (first font) (second font)))
+  (print-font font stream)
   (symbols->stream stream enhanced numeric-timedate-geographic rangelimited)
-  (when (stringp textcolor) (format stream " textcolor ~S" textcolor))
-  (when (integerp textcolor) (format stream " textcolor \"0x~2,'0X\"" textcolor))
-  (when (consp textcolor) (format stream " textcolor \"0x~{~2,'0X~}\"" textcolor)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-"set terminal ~A fontscale ~A size ~A~A,~A~A~%"
-"set termoption enhanced~%"
-"set output \"~A\"~%"
-"set title \"~A\"~%"
-"set tics ~A~%"
+  (print-textcolor textcolor stream))
 
 @export
 @annot.doc:doc
@@ -388,10 +477,18 @@ Syntax:
   (when (member freq-default  '(:default)) (symbols->stream stream freq-default))
   (when (integerp freq-default) (format stream " ~D" freq-default)))
 
-
 @export
 @annot.doc:doc
-"@b(Описание:) set-key.
+"@b(Описание:) set-key
+@begin[lang=lisp](code)
+ (set-key :box :box :box-line-style 5 :box-line-width 2 )
+ (set-key :position '(0 5) :box :box :box-line-width 2 :hor-justification :center :ver-justification :center)
+ (set-key :position '((:character . 1) (:character . 5)) :box :box :box-line-width 2
+	 :hor-justification :left :ver-justification :center )
+ (set-key :position '((:screen . 0.5) (:screen . 0.5)) :box :box :box-line-width 2
+	 :hor-justification :left :ver-justification :center)
+ (set-key :autotitle-columnheader :autotitle_columnheader) => set key autotitle columnheader
+@end(code)
 
  Syntax:
        set key {on|off} {default}
@@ -418,23 +515,19 @@ Syntax:
 		   hor-justification ver-justification
                    vertical-horizontal |Left-Right|
 		   enhanced opaque reverse invert
-		   samplen
-		   spacing
-		   width height
-		   
-		   autotitle columnheader
+		   samplen spacing width height
+		   autotitle-columnheader
 		   title title-text title-enhanced title-justification
 
 		   font textcolor
-		   box line-style line-type line-width
+		   box box-line-style box-line-type box-line-width
 
-		   maxcols
-		   maxrows
+		   maxcols maxrows
 		   )
   (assert (member on-off    '(nil :on :off)))
   (assert (member default   '(nil :default)))
   (assert (or (member position  '(nil :inside :outside :fixed :l-margin :r-margin :t-margin :b-margin))
-	      (valid-offset position)))
+	      (valid-position position)))
   (assert (member hor-justification '(nil :left :right :center)))
   (assert (member ver-justification '(nil :top :bottom :center)))
   (assert (member vertical-horizontal '(nil :vertical :horizontal)))
@@ -445,20 +538,130 @@ Syntax:
   (assert (member reverse  '(nil :reverse :no-reverse)))
   (assert (member invert   '(nil :invert :no-invert)))
 
-  (assert (or (member samplen   '(nil )) (numberp samplen)))
-  (assert (or (member spacing   '(nil )) (numberp spacing)))
-  (assert (or (member width     '(nil )) (numberp width)))
-  (assert (or (member height    '(nil )) (numberp height)))
-  (assert (or (member autotitle '(nil :no-autotitle :autotitle))))
-;;;; columnheader
+  (assert (or (member samplen   '(nil)) (numberp samplen)))
+  (assert (or (member spacing   '(nil)) (numberp spacing)))
+  (assert (or (member width     '(nil)) (numberp width)))
+  (assert (or (member height    '(nil)) (numberp height)))
+  (assert (or (member autotitle-columnheader
+		      '(nil :no-autotitle :autotitle :autotitle_columnheader))))
   (assert (member  title '(nil :title )))
-  (assert (stringp title-text))
+  (assert (or (null title-text) (stringp title-text)))
+  (assert (member  title-enhanced '(nil :no-enhanced :enhanced)))
   (assert (member  title-justification '(nil :center :left :right)))
-
-  (assert (or (null font) (stringp font)
-	      (and (consp font)
-		   (stringp (first font))
-		   (numberp (second font)))))
+  (assert (eq (null title) (null (or title-text title-enhanced title-justification))))
   
-;;;;  
+  (assert (or (null font)      (valid-font font)))
+  (assert (or (null textcolor) (valid-colorspec textcolor)))
+
+  (assert (member box '(nil :no-box :box)))
+  (assert (or (null box-line-style) (numberp box-line-style)))
+  (assert (or (null box-line-type)  (numberp box-line-type)))
+  (assert (or (null box-line-width) (numberp box-line-width)))
+  
+  (assert (or
+	   (and (null box) (null (or box-line-style box-line-type box-line-width)))
+	   (and (eq box :no-box) (null (or box-line-style box-line-type box-line-width)))
+	   (and (eq box :box)    (or box-line-style box-line-type box-line-width))))
+
+  (assert (or (member maxcols '(nil :auto)) (integerp maxcols)))
+  (assert (or (member maxrows '(nil :auto)) (integerp maxrows)))
+  
+  (format stream "set key")
+  (symbols->stream stream on-off default)
+  (block position
+    (when (member position
+		  '(:inside :outside :fixed :l-margin :r-margin :t-margin :b-margin))
+      (symbols->stream stream position))
+    
+    (when (valid-position position)
+      (format stream " at ~{~A~^, ~}"
+	      (mapcar #'(lambda (el)
+			  (cond
+			    ((numberp el) (format nil "~A" el))
+			    ((consp   el) (format nil "~A ~A" (symbol-string (car el)) (cdr el)))))
+		      position))))
+  (symbols->stream stream hor-justification ver-justification vertical-horizontal)
+  (symbols->stream-capitalize stream |Left-Right|)
+  
+  (symbols->stream stream enhanced opaque reverse invert)
+  (symbols->stream stream samplen spacing width height autotitle-columnheader) 
+  (block title
+    (symbols->stream stream title)
+    (when (stringp title-text) (format stream " ~S" title-text))
+    (symbols->stream stream title-enhanced title-justification))
+  (print-font font)
+  (print-textcolor textcolor)
+  (block box
+    (symbols->stream stream box)
+    (when box-line-style (format stream " linestyle ~A" box-line-style))
+    (when box-line-type  (format stream " linetype ~A" box-line-type))
+    (when box-line-width (format stream " linewidth ~A" box-line-width)))
+  
+  (block maxcols
+    (when (eq maxcols :auto) (format stream " maxcols ~A" (symbol-string maxcols)))
+    (when (integerp maxcols) (format stream " maxcols ~D" maxcols)))
+
+  (block maxrows
+    (when (eq maxrows :auto) (format stream " maxrows ~A" (symbol-string maxrows)))
+    (when (integerp maxrows) (format stream " maxrows ~D" maxrows))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+@export
+@annot.doc:doc
+"
+help set title
+ The `set title` command produces a plot title that is centered at the top of
+ the plot.  `set title` is a special case of `set label`.
+
+ Syntax:
+       set title {\"<title-text>\"} {offset <offset>} {font \"<font>{,<size>}\"}
+                 {{textcolor | tc} {<colorspec> | default}} {{no}enhanced}
+       show title
+
+ If <offset> is specified by either x,y or x,y,z the title is moved by the
+ given offset.  It may be preceded by `first`, `second`, `graph`, `screen`,
+ or `character` to select the coordinate system.  See `coordinates` for
+ details.  By default, the `character` coordinate system is used.  For
+ example, \"`set title offset 0,-1`\" will change only the y offset of the
+ title, moving the title down by roughly the height of one character.  The
+ size of a character depends on both the font and the terminal.
+
+ <font> is used to specify the font with which the title is to be written;
+ the units of the font <size> depend upon which terminal is used.
+
+ `textcolor <colorspec>` changes the color of the text. <colorspec> can be a
+ linetype, an rgb color, or a palette mapping. See help for `colorspec` and
+ `palette`.
+
+ `noenhanced` requests that the title not be processed by the enhanced text
+ mode parser, even if enhanced text mode is currently active.
+
+ `set title` with no parameters clears the title.
+
+ See `syntax` for details about the processing of backslash sequences and
+ the distinction between single- and double-quotes.
+"
+(defun set-title (text offset font textcolor enhanced)
+  (assert (text)
+  (assert offset)
+  (assert font)
+  (assert textcolor)
+  (assert enhanced)
   )
+
+ The `set title` command produces a plot title that is centered at the top of
+ the plot.  `set title` is a special case of `set label`.
+
+ Syntax:
+       set title {\"<title-text>\"} {offset <offset>} {font \"<font>{,<size>}\"}
+                 {{textcolor | tc} {<colorspec> | default}} {{no}enhanced}
+ show title
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+"set terminal ~A fontscale ~A size ~A~A,~A~A~%"
+"set termoption enhanced~%"
+"set output \"~A\"~%"
+"set title \"~A\"~%"
+"set tics ~A~%"
