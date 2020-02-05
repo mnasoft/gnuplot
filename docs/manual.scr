@@ -47,4 +47,13 @@
 )
 @end(section)
 
+@begin(section)
+@title(Функции set)
+@cl:with-package[name="gnuplot"](
+ @cl:doc(function set-*range)
+ @cl:doc(function help-set-*tics)
+)
+@end(section)
+
+
 
