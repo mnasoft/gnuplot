@@ -27,9 +27,23 @@
 @export
 @annot.doc:doc
 "@b(Описание:) set-grid
-@b(Пример использования:)
+
+ @b(Пример использования:)
 @begin[lang=lisp](code)
  (set-grid :xtics :xtics :ztics :ztics :layer :back)
+@end(code)
+
+ @b(GNUPLOT Syntax:)
+@begin[lang=gnuplot](code)
+       set grid {{no}{m}xtics} {{no}{m}ytics} {{no}{m}ztics}
+                {{no}{m}x2tics} {{no}{m}y2tics} {{no}{m}rtics}
+                {{no}{m}cbtics}
+                {polar {<angle>}}
+                {layerdefault | front | back}
+                {{no}vertical}
+                {<line-properties-major> {, <line-properties-minor>}}
+       unset grid
+       show grid
 @end(code)
 "
 (defun set-grid (&key
@@ -75,6 +89,14 @@
  (set-polar) => set polar
 @end(code)
 
+ @b (GNUPLOT Syntax:)
+@begin[lang=gnuplot](code)
+ Syntax:
+       set polar
+       unset polar
+       show polar
+@end(code)
+
  @b(Пример использования:)
 @begin[lang=gnuplot](code)
  Example:
@@ -114,19 +136,20 @@
 
 @export
 @annot.doc:doc
-"@b(Описание:)
+"@b(Описание:) set-*range 
+
+ @b(GNUPLOT Syntax:)
 @begin[lang=gnuplot](code)
- Syntax:
        set xrange [{{<min>}:{<max>}}] {{no}reverse} {{no}writeback} {{no}extend}
                   | restore
        show xrange
 @end(code)
 
-@b(Пример использования:)
- @begin[lang=lisp](code)
- (set-*range :x  :restore :restore)
- (set-*range :x :min 1 :max 10)
- @end(code)
+ @b(Пример использования:)
+@begin[lang=lisp](code)
+ (set-*range :x  :restore :restore) => set xrange restore
+ (set-*range :x :min 1 :max 10)     => set xrange [1:10]
+@end(code)
 "
 (defun set-*range (axis &key (stream t) min max reverse writeback extend restore)
   (assert (member axis      '(:x :y :z :x2 :y2 :cb :r :t :u :v)))
@@ -149,18 +172,18 @@
 
 @annot.doc:doc
 "@b(Описание:) valid-offset проверяет правильность фомата смещения подписи к засечкам.
- 
+
  @b(Пример использования:)
- @begin[lang=lisp](code)
+@begin[lang=lisp](code)
  (valid-offset '(2 1)) => T
  (valid-offset '(2 1 5)) => T
  (valid-offset '((:first . 2) (:second . 1) (:graph . 5)))  => T
  (valid-offset '((:screen . 2) (:character . 1))) => T
  (valid-offset '(1)) => NIL
  (valid-offset '(1 2 3 4)) =>NIL
- @end(code)
+@end(code)
 
- @b(gnuplot:) 
+ @b(gnuplot:)
  Смещение <offset> может быть задано в виде x,y или x,y,z.
  Каждая из координат может предваряться словами `first`, `second`, 
  `graph`, `screen` или `character` для указания системы координат.
@@ -168,13 +191,12 @@
  Системой координат поумолчанию является `character`.
  `nooffset` switches off the offset.
 
- Example:
- @b(Пример использования:)
+ @b(Пример использования:) 
 
- @begin[lang=lisp](gnuplot)
- #Перемещает xtics более плотно к графику. 
+ Перемещает xtics более плотно к графику. 
+@begin[lang=gnuplot](code)
        set xtics offset 0,graph 0.05
- @end(code)
+@end(code)
 "
 (defun valid-offset (offset)
   (labels ((cons-with-key-number (key-lst)
@@ -187,9 +209,9 @@
     (and (every (cons-with-key-number '(:first :second :graph :screen :character)) offset)
 	 (<= 2 (length offset) 3))))
 
-@export
 @annot.doc:doc
 "
+@begin[lang=text](code)
  This section describes placement of the primary, auto-generated key.
  To construct a secondary key or place plot titles elsewhere, see
  `multiple keys`.
@@ -252,6 +274,7 @@
  is given is to align the key as though it were text positioned using the
  label command, i.e., `left` means left align with key to the right of
  <position>, etc.
+@end(code)
 "
 (defun valid-position (position)
   (labels ((cons-with-key-number (key-lst)
@@ -265,7 +288,9 @@
 	 (<= 2 (length position) 3))))
 
 @annot.doc:doc
-"@b(Пример использования:)
+"@b(Описание:) valid-step-freq
+
+ @b(Пример использования:)
 @begin[lang=lisp](code)
  (valid-step-freq :autofreq) => nil
  (valid-step-freq '(1 . 2))  =>  [Condition of type TYPE-ERROR]
@@ -281,6 +306,14 @@
 	  (every #'numberp step-freq)
 	  (<= 2 (length step-freq) 3)))))
 
+@annot.doc:doc
+"@b(Описание:) valid-labels
+
+ @b(Пример использования:)
+@begin[lang=lisp](code)
+  (valid-labels '((\"Pi\"  3.141592653589793d0) (\"e\"  2.718281828459045))) => T
+@end(code)
+"
 (defun valid-labels (label)
   (cond
     ((and (consp label)
@@ -289,7 +322,7 @@
 	   label)))))
 
 @annot.doc:doc
-"@b(Описание:) valid-colorspec проверка на корректность.
+"@b(Описание:) valid-colorspec проверка на корректность спецификации цвета.
 
  @b(Пример использования:)
 @begin[lang=lisp](code)
@@ -311,12 +344,18 @@
 	       (and (integerp el) (<= 0 el #xff)))
 	   colorspec)))))
 
+@annot.doc:doc
+"@b(Описание:) valid-font проверка на корректность шрифта.
+"
 (defun valid-font (font)
   (or (stringp font)
       (and (consp font)
 	   (stringp (first font))
 	   (numberp (second font)))))
 
+@annot.doc:doc
+"@b(Описание:) print-font
+"
 (defun print-font (font &optional (stream t))
   (when (stringp font) (format stream " font ~S" font))
   (when (and (consp font)
@@ -324,6 +363,9 @@
 	     (numberp (second font)))
     (format stream " font \"~A,~A\"" (first font) (second font))))
 
+@annot.doc:doc
+"@b(Описание:) print-textcolor
+"
 (defun print-textcolor (textcolor &optional (stream t))
   (when (stringp textcolor) (format stream " textcolor ~S" textcolor))
   (when (integerp textcolor) (format stream " textcolor \"0x~2,'0X\"" textcolor))
@@ -352,8 +394,8 @@
 set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
 @end(code)
 
-@b(Описание:) gnuplot.
- Syntax:
+@b(GNUPLOT Syntax:) 
+@begin[lang=gnuplot](code)
        set xtics {axis | border} 
                  {{no}mirror}
                  {in | out}
@@ -373,7 +415,9 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
                  { rangelimited }
                  { textcolor <colorspec> }
        unset xtics
-       show xtics"
+       show xtics
+@end(code)
+"
 (defun set-*tics (axis
 		  &key
 		    (stream t) axis-border mirror in-out scale rotate
@@ -458,12 +502,14 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
  @item( freq-default - количество делений между основнями засекками или :default.)
 @end(list)
 
- @b(Gnuplot)
-Syntax:
+ @b(Gnuplot Syntax:)
+@begin[lang=lisp](code)
        set mxtics {<freq> | default}
        unset mxtics
        show mxtics
-@b(Пример использования:)
+@end(code)
+
+ @b(Пример использования:)
 @begin[lang=lisp](code)
  (set-m*tics :y :freq-default 5) => set mytics 5
 @end(code)
@@ -480,6 +526,8 @@ Syntax:
 @export
 @annot.doc:doc
 "@b(Описание:) set-key
+
+ @b(Пример использования:)
 @begin[lang=lisp](code)
  (set-key :box :box :box-line-style 5 :box-line-width 2 )
  (set-key :position '(0 5) :box :box :box-line-width 2 :hor-justification :center :ver-justification :center)
@@ -490,7 +538,8 @@ Syntax:
  (set-key :autotitle-columnheader :autotitle_columnheader) => set key autotitle columnheader
 @end(code)
 
- Syntax:
+@b(GNUPLOT Syntax:)
+@begin[lang=gnuplot](code)
        set key {on|off} {default}
              {{inside | outside | fixed} | {lmargin | rmargin | tmargin | bmargin}
                | {at <position>}}
@@ -509,6 +558,7 @@ Syntax:
              {maxrows {<max no. of rows> | auto}}
        unset key
        show key
+@end(code)
 "
 (defun set-key ( &key
 		   (stream t) on-off default position
@@ -609,54 +659,22 @@ Syntax:
 
 @export
 @annot.doc:doc
-"
-help set title
- The `set title` command produces a plot title that is centered at the top of
- the plot.  `set title` is a special case of `set label`.
+"@b(Описание:) set-title
 
- Syntax:
+ @b(GNUPLOT Syntax:)
+@begin[lang=gnuplot](code)
        set title {\"<title-text>\"} {offset <offset>} {font \"<font>{,<size>}\"}
                  {{textcolor | tc} {<colorspec> | default}} {{no}enhanced}
        show title
-
- If <offset> is specified by either x,y or x,y,z the title is moved by the
- given offset.  It may be preceded by `first`, `second`, `graph`, `screen`,
- or `character` to select the coordinate system.  See `coordinates` for
- details.  By default, the `character` coordinate system is used.  For
- example, \"`set title offset 0,-1`\" will change only the y offset of the
- title, moving the title down by roughly the height of one character.  The
- size of a character depends on both the font and the terminal.
-
- <font> is used to specify the font with which the title is to be written;
- the units of the font <size> depend upon which terminal is used.
-
- `textcolor <colorspec>` changes the color of the text. <colorspec> can be a
- linetype, an rgb color, or a palette mapping. See help for `colorspec` and
- `palette`.
-
- `noenhanced` requests that the title not be processed by the enhanced text
- mode parser, even if enhanced text mode is currently active.
-
- `set title` with no parameters clears the title.
-
- See `syntax` for details about the processing of backslash sequences and
- the distinction between single- and double-quotes.
+@end(code)
 "
 (defun set-title (text offset font textcolor enhanced)
-  (assert (text)
+  (assert text)
   (assert offset)
   (assert font)
   (assert textcolor)
   (assert enhanced)
   )
-
- The `set title` command produces a plot title that is centered at the top of
- the plot.  `set title` is a special case of `set label`.
-
- Syntax:
-       set title {\"<title-text>\"} {offset <offset>} {font \"<font>{,<size>}\"}
-                 {{textcolor | tc} {<colorspec> | default}} {{no}enhanced}
- show title
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -665,3 +683,8 @@ help set title
 "set output \"~A\"~%"
 "set title \"~A\"~%"
 "set tics ~A~%"
+
+
+
+
+

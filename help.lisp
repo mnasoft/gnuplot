@@ -12,6 +12,7 @@
 @end(code)
 
  @b(Gnuplot:)
+@begin[lang=gnuplot](code)
  The `set grid` command allows grid lines to be drawn on the plot.
 
  Syntax:
@@ -57,7 +58,9 @@
  various ticmarks (see `set xtics`).
 
  Z grid lines are drawn on the bottom of the plot.  This looks better if a
- partial box is drawn around the plot---see `set border`."
+ partial box is drawn around the plot---see `set border`.
+@end(code)
+"
 (defun help-set-grid (&optional (stream t))
   (format stream "~a"  (documentation 'help-set-grid 'function)))
 
@@ -70,7 +73,7 @@
 @end(code)
 
  @b(Gnuplot:) 
-
+@begin[lang=gnuplot](code)
  The `set polar` command changes the meaning of the plot from rectangular
  coordinates to polar coordinates.
 
@@ -120,13 +123,14 @@
  polar demos (polar.dem)
  and
  polar data plot (poldat.dem).
+@end(code)
 "
 (defun help-set-polar (&optional (stream t))
   (format stream "~a"  (documentation 'help-set-polar 'function)))
 
 @export
 @annot.doc:doc
-"
+"@begin[lang=gnuplot](code)
  The `set xrange` command sets the horizontal range that will be displayed.
  A similar command exists for each of the other axes, as well as for the
  polar radius r and the parametric variables t, u, and v.
@@ -237,6 +241,7 @@ Press return for more:
        set xrange [-200<*<100:]
 
 (set-*range \"y\" :no-reverse t :writeback t)
+@end(code)
 "
 (defun help-set-*range (&optional (stream t))
   (format stream "~a"  (documentation 'help-set-*range 'function)))
@@ -246,6 +251,7 @@ Press return for more:
 " @b(Описание:) help-set-*tics Помощь по командам gnuplot:
  set xtics, set ytics, set ztics, set x2tics, set y2tics 
 
+@begin[lang=gnuplot](code)
  help xtics
  Fine control of the major (labeled) tics on the x axis is possible with the
  `set xtics` command.  The tics may be turned off with the `unset xtics`
@@ -418,13 +424,16 @@ Press return for more:
  border line (see `set border`), even if the tics are drawn at the axes.
 
 Subtopics available for xtics:
-    rangelimited      timedata"
+    rangelimited      timedata
+@end(code)
+"
 (defun help-set-*tics (&optional (stream t))
   (format stream "~a"  (documentation 'help-set-*tics 'function)))
 
 @export
 @annot.doc:doc
-"  
+"
+@begin[lang=gnuplot](code)
  Many commands allow you to specify a linetype with an explicit color.
 
  Syntax:
@@ -479,13 +488,14 @@ Press return for more:
  cbrange mapping of the palette. This allows smoothly-varying color along a
  3d line or surface. It also allows coloring 2D plots by palette values read
  from an extra column of data (not all 2D plot styles allow an extra column).
- There are two special color specifiers: `bgnd` for background color and `black`."
+ There are two special color specifiers: `bgnd` for background color and `black`.
+@end(code)"
 (defun help-colorspec (&optional (stream t))
   (format stream "~a"  (documentation 'help-colorspec 'function)))
 
 @export
 @annot.doc:doc
-"
+"@begin[lang=gnuplot](code)
  The `set key` command enables a key (or legend) containing a title and a
  sample (line, point, box) for each plot in the graph. The key may be turned off
  by requesting `set key off` or `unset key`.  Individual key entries may be
@@ -587,14 +597,14 @@ Press return for more:
 Subtopics available for key:
     3D                autotitle         examples          fixed
     multiple          placement         samples           splot
-"
+@end(code)"
 (defun help-set-key (&optional (stream t))
     (format stream "~a"  (documentation 'help-set-key 'function)))
 
 
 @export
 @annot.doc:doc
-"
+"@begin[lang=gnuplot](code)
  Minor tic marks along the x axis are controlled by `set mxtics`.  They can be
  turned off with `unset mxtics`.  Similar commands control minor tics along
  the other axes.
@@ -644,6 +654,46 @@ Subtopics available for key:
  By default, minor tics are off for linear axes and on for logarithmic axes.
  They inherit the settings for `axis|border` and `{no}mirror` specified for
  the major tics.  Please see `set xtics` for information about these.
-"
+@end(code)"
 (defun help-set-m*tics (&optional (stream t))
     (format stream "~a"  (documentation 'help-set-m*tics 'function)))
+
+@export
+@annot.doc:doc
+"@begin[lang=gnuplot](code)
+help set title
+ The `set title` command produces a plot title that is centered at the top of
+ the plot.  `set title` is a special case of `set label`.
+
+ Syntax:
+       set title {\"<title-text>\"} {offset <offset>} {font \"<font>{,<size>}\"}
+                 {{textcolor | tc} {<colorspec> | default}} {{no}enhanced}
+       show title
+
+ If <offset> is specified by either x,y or x,y,z the title is moved by the
+ given offset.  It may be preceded by `first`, `second`, `graph`, `screen`,
+ or `character` to select the coordinate system.  See `coordinates` for
+ details.  By default, the `character` coordinate system is used.  For
+ example, \"`set title offset 0,-1`\" will change only the y offset of the
+ title, moving the title down by roughly the height of one character.  The
+ size of a character depends on both the font and the terminal.
+
+ <font> is used to specify the font with which the title is to be written;
+ the units of the font <size> depend upon which terminal is used.
+
+ `textcolor <colorspec>` changes the color of the text. <colorspec> can be a
+ linetype, an rgb color, or a palette mapping. See help for `colorspec` and
+ `palette`.
+
+ `noenhanced` requests that the title not be processed by the enhanced text
+ mode parser, even if enhanced text mode is currently active.
+
+ `set title` with no parameters clears the title.
+
+ See `syntax` for details about the processing of backslash sequences and
+ the distinction between single- and double-quotes.
+@end(code)
+"
+(defun help-set-title (&optional (stream t))
+    (format stream "~a"  (documentation 'help-set-m*tics 'function)))
+
