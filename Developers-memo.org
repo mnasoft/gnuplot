@@ -1,6 +1,5 @@
 * Ссылки
 1) Операции git  [[file:~/org/sbcl/Git-memo.org][Git-memo.org]]
-
 2) [[file:~/org/sbcl/codex.org][Генерирование документации при помощи Codex]]
 3) http://commondoc.github.io/codex/docs/tutorial.html
 4) [[/home/namatv/.slynkrc]]
@@ -23,6 +22,7 @@ basename `pwd`
 #+RESULTS: basename-pwd
 : gnuplot
 
+#+name:make-graph
 #+BEGIN_SRC lisp :var pwd=pwd :var basename-pwd=basename-pwd
   ;;;; (require :codex)
   ;;;; (require :mnas-package)
@@ -43,5 +43,13 @@ basename `pwd`
 
 #+RESULTS:
 : #GRAPH(VC=13 RC=4)
-: (T:"out-plot" T:"make-plot" T:"valid-colorspec" T:"make-func-polynom-fit" T:"*point-type-box-fill*" T:"*point-type-fill*" T:"*point-type-all*" T:"*color-names*" T:"*point-type-box*" T:"*point-type-fill-box*" T:"*point-type-open*" T:"*const-names*" T:"*color-names-list*" )
-: ((T:"out-plot"->T:"*point-type-all*") (T:"make-plot"->T:"*point-type-all*") (T:"valid-colorspec"->T:"*color-names*") (T:"make-func-polynom-fit"->T:"*const-names*") ))
+: (T:"valid-colorspec" T:"out-plot" T:"make-plot" T:"make-func-polynom-fit" T:"*point-type-fill*" T:"*color-names*" T:"*point-type-box-fill*" T:"*point-type-box*" T:"*point-type-open*" T:"*point-type-fill-box*" T:"*point-type-all*" T:"*color-names-list*" T:"*const-names*" )
+: ((T:"valid-colorspec"->T:"*color-names*") (T:"out-plot"->T:"*point-type-all*") (T:"make-plot"->T:"*point-type-all*") (T:"make-func-polynom-fit"->T:"*const-names*") ))
+
+* Публикация
+#+name: copy-to-n133619
+#+BEGIN_SRC shell :var make-graph=make-graph
+cp -rf ./docs/build/* "\\\\n133619\\home\\_namatv\\public_html\\Site\\Development\\Common-Lisp-Programs\\"
+#+END_SRC
+
+#+RESULTS: copy-to-n133619
