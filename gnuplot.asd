@@ -11,6 +11,7 @@
                (:file "gnuplot")
 	       (:file "color-names")
 	       (:file "set") 
-               (:file "help") 
+               (:file "help")
+               (:file "vectors") 	       
 ;;; (:file "test")
 	       ))

@@ -76,3 +76,30 @@
  :stepen 2  
  )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(progn
+  (defparameter *l*
+    (make-instance '<line>
+		   :start (make-instance '<point> :coords '(10.0 10.0 0.0))
+		   :end   (make-instance '<point> :coords '(25.0 15.0 0.0))))
+  (defparameter *ar*
+    (make-instance '<arc>
+		   :center (make-instance '<point>
+					  :coords '(10.0 50.0 0.0))
+		   :radius 10.0
+		   :start-angle (* 10/8 pi)
+		   :end-angle   (* 4/8 pi )))
+  
+  (defparameter *cr*
+    (make-instance '<circle>
+		   :center (make-instance '<point>
+					  :coords '(10.0 50.0 0.0)) :radius 10.0))
+  (defparameter *s* (make-instance '<gnuplot-vector-printer>))
+  (out  *ar* *s*)
+  (out  *cr* *s*)
+  (out *l* *s*)
+
+  (format t "~A"(get-output-stream-string (<gnuplot-vector-printer>-stream *s*)))
+  (out-vectors-to-file "~/data.data" (list *l* *l* *l* *ar* *cr*))
+  )
