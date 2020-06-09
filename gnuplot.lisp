@@ -412,3 +412,42 @@
       (format f-out "~A"(get-output-stream-string out))
       (setf f-gnuplot (uiop:file-pathname-p f-out)))
     (values f-gnuplot f-txt))) 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+@annot.doc:doc
+"@b(Описание:) функция @b(exclude-x-duplicates) исключет из списка lst-x-y,
+содержащего пары значений X и Y пары у которых значения X совпадают.
+"
+(defun exclude-x-duplicates (lst-x-y)
+  (let ((rez nil))
+    (dolist (x-y lst-x-y)
+      (if (or (null rez)
+	      (null (find (first x-y) rez :key #'first :test #'=)))
+	  (push x-y rez)
+	  (progn
+	    (setf rez (cdr rez))
+	    (push x-y rez))))
+    (nreverse rez)))
+
+@export
+@annot.doc:doc
+"@b(Описание:) функция @b(stacked-chart-data) преобразует список, 
+состоящий из пар значений по оси X и Y к виду гафика с накоплением.
+
+ @b(Пример использования:)
+@begin[lang=lisp](code)
+(gnuplot:stacked-chart-data '((0 0 ) (1 1) (2 2) (3 3) (4 3)))
+=> '((0 0) (1 0) (1 1) (2 1) (2 2) (3 2) (3 3) (4 3))
+@end(code)
+"
+(defun stacked-chart-data (lst-1)
+  (let ((rez nil)
+	(lst (exclude-x-duplicates lst-1)))
+      (map nil
+       #'(lambda (x-0 x-1)
+	   (push x-0 rez)
+	   (push (list (first x-1) (second x-0)) rez))
+       lst
+       (cdr lst))
+	(nreverse rez)))
