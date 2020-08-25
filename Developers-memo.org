@@ -3,74 +3,117 @@
 2) [[file:~/org/sbcl/codex.org][Генерирование документации при помощи Codex]]
 3) http://commondoc.github.io/codex/docs/tutorial.html
 4) [[/home/namatv/.slynkrc]]
- 
+
 * Генерирование документации
-
-#+name: pwd
-#+BEGIN_SRC shell
-pwd
+#+name: make-html
+#+BEGIN_SRC lisp
+  (mnas-package:make-codex-documentation  :gnuplot :gnuplot)
 #+END_SRC
-
-#+RESULTS: pwd
-: /home/namatv/quicklisp/local-projects/clisp/gnuplot
-
-#+name: basename-pwd
-#+BEGIN_SRC shell
-basename `pwd`
-#+END_SRC
-
-#+RESULTS: basename-pwd
-: gnuplot
-
-#+name:make-graph
-#+BEGIN_SRC lisp :var pwd=pwd :var basename-pwd=basename-pwd
-  ;;;; (require :codex)
-  ;;;; (require :mnas-package)
-  ;;;;
-  ;;;; (require :gnuplot)
-  (let ((pkg :gnuplot)
-	(fpath (concatenate
-		'string
-		(cond ((uiop:getenv "MSYS_HOME")) (t ""))
-		pwd "/docs/build/"
-		basename-pwd "/html/")))
-    (codex:document pkg)
-    (mnas-package:view-call-graph   pkg :out-type "png" :viewer nil :fpath fpath :fname "call-graph")
-    (mnas-package:view-system-graph pkg :out-type "png" :viewer nil :fpath fpath :fname "system-graph")
-    (mnas-package:view-class-graph  pkg :out-type "png" :viewer nil :fpath fpath :fname "class-graph")
-    (mnas-package:view-symbol-graph pkg :out-type "png" :viewer nil :fpath fpath :fname "symbol-graph"))
-#+END_SRC
-
-#+RESULTS:
-: #GRAPH(VC=13 RC=4)
-: (T:"valid-colorspec" T:"out-plot" T:"make-plot" T:"make-func-polynom-fit" T:"*point-type-fill*" T:"*color-names*" T:"*point-type-box-fill*" T:"*point-type-box*" T:"*point-type-open*" T:"*point-type-fill-box*" T:"*point-type-all*" T:"*color-names-list*" T:"*const-names*" )
-: ((T:"valid-colorspec"->T:"*color-names*") (T:"out-plot"->T:"*point-type-all*") (T:"make-plot"->T:"*point-type-all*") (T:"make-func-polynom-fit"->T:"*const-names*") ))
 
 * Публикация
 #+name: publish
-#+BEGIN_SRC shell :var make-graph=make-graph
-CDIR=`basename $PWD`
-rm -rf "\\\\n133619\\home\\_namatv\\public_html\\Site\\Development\\Common-Lisp-Programs\\$CDIR\\"
-cp -rf ./docs/build/* "\\\\n133619\\home\\_namatv\\public_html\\Site\\Development\\Common-Lisp-Programs\\"
-#+END_SRC
-
-#+RESULTS: publish
-: gnuplot
-
-#+name: publish
-#+BEGIN_SRC shell :var make-graph=make-graph
+#+BEGIN_SRC shell :var make-html=make-html
+  mkdir -p "$HOME/public_html/Common-Lisp-Programs/"
+  CDIR=`basename $PWD`
+  rsync -Pavzh ./docs/build/$CDIR/html/* $HOME/public_html/Common-Lisp-Programs/$CDIR 
   if [[ `hostname` == "mnasoft-00" ]]
   then
       echo "mnasoft-00"
-      mkdir -p "$HOME/public_html/Common-Lisp-Programs/"
-      CDIR=`basename $PWD`
-      rm -rf "$HOME/public_html/Common-Lisp-Programs/$CDIR/"
-      cp -rf ./docs/build/* "$HOME/public_html/Common-Lisp-Programs/"
   fi
-  if [[ `hostname` == "ko11-118383" ]]
+  if [[ `hostname` == "N118383" ]]
   then
-      CDIR=`basename $PWD`
-      rm -rf "\\\\n133619\\home\\_namatv\\public_html\\Site\\Development\\Common-Lisp-Programs\\$CDIR\\"
-      cp -rf ./docs/build/* "\\\\n133619\\home\\_namatv\\public_html\\Site\\Development\\Common-Lisp-Programs\\"
+      echo "N118383"
+      mkdir -p //n133619/home/_namatv/public_html/Site/Development/Common-Lisp-Programs/$CDIR
+      rsync -Pavzh ./docs/build/$CDIR/html/* //n133619/home/_namatv/public_html/Site/Development/Common-Lisp-Programs/$CDIR
    fi
 #+END_SRC
+
+#+RESULTS: publish
+| sending              | incremental |                                                  file | list       |         |       |         |           |            |         |          |               |
+| created              | directory   | /home/namatv/public_html/Common-Lisp-Programs/gnuplot |            |         |       |         |           |            |         |          |               |
+| call-graph.gv        |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 2.51K       |                                                  100% | 0.00kB/s   | 0:00:00 |       | 2.51K   |      100% | 0.00kB/s   | 0:00:00 | (xfr#1,  | to-chk=19/20) |
+| call-graph.gv.png    |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 32.77K      |                                                    3% | 31.25MB/s  | 0:00:00 |       | 879.10K |      100% | 7.69MB/s   | 0:00:00 | (xfr#2,  | to-chk=18/20) |
+| class-graph.gv       |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 556         |                                                  100% | 4.98kB/s   | 0:00:00 |       | 556     |      100% | 4.98kB/s   | 0:00:00 | (xfr#3,  | to-chk=17/20) |
+| class-graph.gv.png   |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 32.77K      |                                                   28% | 293.58kB/s | 0:00:00 |       | 113.89K |      100% | 896.97kB/s | 0:00:00 | (xfr#4,  | to-chk=16/20) |
+| symbol-graph.gv      |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 436         |                                                  100% | 3.43kB/s   | 0:00:00 |       | 436     |      100% | 3.43kB/s   | 0:00:00 | (xfr#5,  | to-chk=15/20) |
+| symbol-graph.gv.png  |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 32.77K      |                                                   41% | 258.06kB/s | 0:00:00 |       | 78.72K  |      100% | 620.00kB/s | 0:00:00 | (xfr#6,  | to-chk=14/20) |
+| system-graph.gv      |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 259         |                                                  100% | 2.04kB/s   | 0:00:00 |       | 259     |      100% | 2.04kB/s   | 0:00:00 | (xfr#7,  | to-chk=13/20) |
+| system-graph.gv.png  |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 32.77K      |                                                   86% | 228.57kB/s | 0:00:00 |       | 38.02K  |      100% | 265.19kB/s | 0:00:00 | (xfr#8,  | to-chk=12/20) |
+| графы.html           |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 2.33K       |                                                  100% | 16.24kB/s  | 0:00:00 |       | 2.33K   |      100% | 16.24kB/s  | 0:00:00 | (xfr#9,  | to-chk=11/20) |
+| обзор.html           |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 2.26K       |                                                  100% | 15.78kB/s  | 0:00:00 |       | 2.26K   |      100% | 15.78kB/s  | 0:00:00 | (xfr#10, | to-chk=10/20) |
+| переменные.html      |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 5.41K       |                                                  100% | 37.74kB/s  | 0:00:00 |       | 5.41K   |      100% | 37.74kB/s  | 0:00:00 | (xfr#11, | to-chk=9/20)  |
+| функции-help.html    |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 32.77K      |                                                   75% | 228.57kB/s | 0:00:00 |       | 43.27K  |      100% | 301.83kB/s | 0:00:00 | (xfr#12, | to-chk=8/20)  |
+| функции-print.html   |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 2.67K       |                                                  100% | 18.64kB/s  | 0:00:00 |       | 2.67K   |      100% | 18.64kB/s  | 0:00:00 | (xfr#13, | to-chk=7/20)  |
+| функции-set.html     |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 11.73K      |                                                  100% | 81.85kB/s  | 0:00:00 |       | 11.73K  |      100% | 81.85kB/s  | 0:00:00 | (xfr#14, | to-chk=6/20)  |
+| функции-valid.html   |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 8.49K       |                                                  100% | 59.25kB/s  | 0:00:00 |       | 8.49K   |      100% | 59.25kB/s  | 0:00:00 | (xfr#15, | to-chk=5/20)  |
+| функции.html         |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 13.74K      |                                                  100% | 95.84kB/s  | 0:00:00 |       | 13.74K  |      100% | 95.84kB/s  | 0:00:00 | (xfr#16, | to-chk=4/20)  |
+| static/              |             |                                                       |            |         |       |         |           |            |         |          |               |
+| static/highlight.css |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 1.57K       |                                                  100% | 10.96kB/s  | 0:00:00 |       | 1.57K   |      100% | 10.96kB/s  | 0:00:00 | (xfr#17, | to-chk=2/20)  |
+| static/highlight.js  |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 22.99K      |                                                  100% | 160.36kB/s | 0:00:00 |       | 22.99K  |      100% | 160.36kB/s | 0:00:00 | (xfr#18, | to-chk=1/20)  |
+| static/style.css     |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 4.32K       |                                                  100% | 30.12kB/s  | 0:00:00 |       | 4.32K   |      100% | 30.12kB/s  | 0:00:00 | (xfr#19, | to-chk=0/20)  |
+|                      |             |                                                       |            |         |       |         |           |            |         |          |               |
+| sent                 | 934.73K     |                                                 bytes | received   |     465 | bytes | 1.87M   | bytes/sec |            |         |          |               |
+| total                | size        |                                                    is | 1.23M      | speedup | is    | 1.32    |           |            |         |          |               |
+| N118383              |             |                                                       |            |         |       |         |           |            |         |          |               |
+| sending              | incremental |                                                  file | list       |         |       |         |           |            |         |          |               |
+| call-graph.gv        |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 2.51K       |                                                  100% | 0.00kB/s   | 0:00:00 |       | 2.51K   |      100% | 0.00kB/s   | 0:00:00 | (xfr#1,  | to-chk=19/20) |
+| call-graph.gv.png    |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 32.77K      |                                                    3% | 31.25MB/s  | 0:00:00 |       | 879.10K |      100% | 5.99MB/s   | 0:00:00 | (xfr#2,  | to-chk=18/20) |
+| class-graph.gv       |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 556         |                                                  100% | 3.88kB/s   | 0:00:00 |       | 556     |      100% | 3.88kB/s   | 0:00:00 | (xfr#3,  | to-chk=17/20) |
+| class-graph.gv.png   |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 32.77K      |                                                   28% | 228.57kB/s | 0:00:00 |       | 113.89K |      100% | 712.98kB/s | 0:00:00 | (xfr#4,  | to-chk=16/20) |
+| symbol-graph.gv      |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 436         |                                                  100% | 2.73kB/s   | 0:00:00 |       | 436     |      100% | 2.73kB/s   | 0:00:00 | (xfr#5,  | to-chk=15/20) |
+| symbol-graph.gv.png  |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 32.77K      |                                                   41% | 205.13kB/s | 0:00:00 |       | 78.72K  |      100% | 492.82kB/s | 0:00:00 | (xfr#6,  | to-chk=14/20) |
+| system-graph.gv      |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 259         |                                                  100% | 1.62kB/s   | 0:00:00 |       | 259     |      100% | 1.62kB/s   | 0:00:00 | (xfr#7,  | to-chk=13/20) |
+| system-graph.gv.png  |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 32.77K      |                                                   86% | 102.56kB/s | 0:00:00 |       | 38.02K  |      100% | 119.00kB/s | 0:00:00 | (xfr#8,  | to-chk=12/20) |
+| графы.html           |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 2.33K       |                                                  100% | 7.29kB/s   | 0:00:00 |       | 2.33K   |      100% | 7.29kB/s   | 0:00:00 | (xfr#9,  | to-chk=11/20) |
+| обзор.html           |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 2.26K       |                                                  100% | 7.08kB/s   | 0:00:00 |       | 2.26K   |      100% | 7.08kB/s   | 0:00:00 | (xfr#10, | to-chk=10/20) |
+| переменные.html      |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 5.41K       |                                                  100% | 16.94kB/s  | 0:00:00 |       | 5.41K   |      100% | 16.94kB/s  | 0:00:00 | (xfr#11, | to-chk=9/20)  |
+| функции-help.html    |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 32.77K      |                                                   75% | 102.56kB/s | 0:00:00 |       | 43.27K  |      100% | 135.44kB/s | 0:00:00 | (xfr#12, | to-chk=8/20)  |
+| функции-print.html   |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 2.67K       |                                                  100% | 8.36kB/s   | 0:00:00 |       | 2.67K   |      100% | 8.36kB/s   | 0:00:00 | (xfr#13, | to-chk=7/20)  |
+| функции-set.html     |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 11.73K      |                                                  100% | 35.04kB/s  | 0:00:00 |       | 11.73K  |      100% | 35.04kB/s  | 0:00:00 | (xfr#14, | to-chk=6/20)  |
+| функции-valid.html   |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 8.49K       |                                                  100% | 25.37kB/s  | 0:00:00 |       | 8.49K   |      100% | 25.37kB/s  | 0:00:00 | (xfr#15, | to-chk=5/20)  |
+| функции.html         |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 13.74K      |                                                  100% | 41.03kB/s  | 0:00:00 |       | 13.74K  |      100% | 41.03kB/s  | 0:00:00 | (xfr#16, | to-chk=4/20)  |
+| static/              |             |                                                       |            |         |       |         |           |            |         |          |               |
+| static/highlight.css |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 1.57K       |                                                  100% | 4.69kB/s   | 0:00:00 |       | 1.57K   |      100% | 4.69kB/s   | 0:00:00 | (xfr#17, | to-chk=2/20)  |
+| static/highlight.js  |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 22.99K      |                                                  100% | 68.66kB/s  | 0:00:00 |       | 22.99K  |      100% | 68.66kB/s  | 0:00:00 | (xfr#18, | to-chk=1/20)  |
+| static/style.css     |             |                                                       |            |         |       |         |           |            |         |          |               |
+|                      | 4.32K       |                                                  100% | 12.90kB/s  | 0:00:00 |       | 4.32K   |      100% | 12.90kB/s  | 0:00:00 | (xfr#19, | to-chk=0/20)  |
+|                      |             |                                                       |            |         |       |         |           |            |         |          |               |
+| sent                 | 934.73K     |                                                 bytes | received   |     389 | bytes | 623.41K | bytes/sec |            |         |          |               |
+| total                | size        |                                                    is | 1.23M      | speedup | is    | 1.32    |           |            |         |          |               |
