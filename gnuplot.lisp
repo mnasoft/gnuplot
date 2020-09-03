@@ -2,15 +2,13 @@
 
 (in-package #:gnuplot)
 
-(annot:enable-annot-syntax)
-
 (defparameter *const-names*
   (list "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "w")
   "Имена переменных для использования при создании осредняющих функций 
 при помощи make-func-polynom-fit")
 
-@export
-@annot.doc:doc
+(export 'make-int-range )
+(defun make-int-range (from to)
 "Возвращает список, состоящий из чисел от from до to включительно
 
  @b(Пример использования:)
@@ -18,15 +16,14 @@
  (make-int-range 30 45) => (30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45)
 @end(code)
 "
-(defun make-int-range (from to)
   (let ((rez nil))
     (do 
      ((i from (+ 1 i)))
      ((> i to) rez)
       (setf rez (append rez (list i))))))
 
-@export
-@annot.doc:doc
+(export 'make-int-list )
+(defun make-int-list (n-lst)
 "@b(Описание:) make-int-list формирует список, состоящий из целых чисел
 Принимает список элементами которого могут быть целые или
 списки из двух целых 
@@ -39,7 +36,6 @@
  (make-int-list '(5 (6 9) 12 (50 55)))
 @end(code)
 "
-(defun make-int-list (n-lst)
   (apply #'append
 	 (mapcar
 	  #'(lambda (lst)
@@ -48,8 +44,8 @@
 		  ((numberp lst) (list lst))))
 	  n-lst)))
 
-@export
-@annot.doc:doc
+(export 'extract )
+(defun extract (col-number-list val-list)
 "@b(Описание:) extract выбирает из списка списков val-list 
 колонки с номерами, находящиеся в списке col-number-list
 Возвращает список списков из отобранных колонок.
@@ -68,15 +64,14 @@
   (30 32 33 34))
 @end(code)
 "
-(defun extract (col-number-list val-list)
   (mapcar   #'(lambda (el)
 		(mapcar
 		 #'(lambda (n) (nth n el))
 		 (make-int-list col-number-list)))
 	    val-list))
 
-@export
-@annot.doc:doc
+(export 'make-func-polynom-fit )
+(defun make-func-polynom-fit (input x-nom y-nom stepen &optional (out (make-string-output-stream)))
 "@b(Описание:) make-func-polynom-fit функция для генерации одиночной осредняющей кривой
 
  @b(Переменые:)
@@ -92,7 +87,6 @@
   (make-func-polynom-fit \"input.txt\" 1 3 6)
 @end(code)
 "
-(defun make-func-polynom-fit (input x-nom y-nom stepen &optional (out (make-string-output-stream)))
   (format out "f_~A_~A(x) = ~A~%" (+ x-nom 1) (+ y-nom 1)
 	  (let ((str "")
 		(ind (format nil "_~A_~A" (+ x-nom 1) (+ y-nom 1)))
@@ -110,8 +104,8 @@
   (format out "~%")
   (get-output-stream-string out))
 
-@export
-@annot.doc:doc
+(export 'out-func-polynom-fit )
+(defun out-func-polynom-fit (file-name lst stepen)
 "@b(Описание:) out-func-polynom-fit
 
  @b(Пример использования:)
@@ -119,7 +113,6 @@
  (out-func-polynom-fit \"1_CO_NOX-t04.txt\" '(0 (2 3)) 6)
 @end(code)
 "
-(defun out-func-polynom-fit (file-name lst stepen)
   (let ( (out (make-string-output-stream)))
     (mapc
      #'(lambda(el)
@@ -128,8 +121,9 @@
      (second lst))
     (get-output-stream-string out)))
 
-@export
-@annot.doc:doc
+(export 'out-plot )
+(defun out-plot (data-file lst ht-labels
+		&key (axis nil) (point-type *point-type-all*) (point-scale 2) (line-type -1) (line-width 3) (point-type-number 0))
 "@b(Описание:) out-plot
 
  @b(Переменые:)
@@ -145,8 +139,6 @@
   (out-plot \"1_CO_NOX-t04.txt\" '(0 (2  4 5)) *tbl-labes-hash*  :axis \"x1y1\" :point-type *point-type-fill* :point-type-number 3)
 @end(code)
 "
-(defun out-plot (data-file lst ht-labels
-		&key (axis nil) (point-type *point-type-all*) (point-scale 2) (line-type -1) (line-width 3) (point-type-number 0))
   (let ((pt point-type-number)		  ; номер точки
 	(out (make-string-output-stream)) ; поток для вывода
 	)
@@ -171,8 +163,8 @@
      (second lst))
     (values (string-right-trim "\\," (get-output-stream-string out)) pt)))
 
-@export
-@annot.doc:doc
+(export 'format-n-string )
+(defun format-n-string (n &key (str-format "~A") (str-delimiter " "))
 " @b(Описание:) format-n-string формирует строку для использования с функцией format
 для вывода n значений в формате str-format c разделителями str-delimiter.
 
@@ -183,13 +175,12 @@
  (format-n-string 15 :str-format \"~S\")
 @end(code)
 "
-(defun format-n-string (n &key (str-format "~A") (str-delimiter " "))
   (let ((str ""))
     (dotimes (i n (concatenate 'string (string-right-trim str-delimiter str) "~%"))
       (setf str (concatenate 'string str str-format str-delimiter)))))
 
-@export
-@annot.doc:doc
+(export 'out-table )
+(defun out-table (table  &key (out t) (str-format "~A") (str-delimiter " "))
 "@b(Описание:) out-table выводит 2d-список @b(table) в поток @b(out).
  
  @b(Переменые:)
@@ -210,15 +201,14 @@
  T
 @end(code)
 "
-(defun out-table (table  &key (out t) (str-format "~A") (str-delimiter " "))
   (mapcar
    #'(lambda (el)
        (apply #'format out (format-n-string (length el) :str-format str-format :str-delimiter str-delimiter) el))
    table)
   t)
 
-@export
-@annot.doc:doc
+(export 'make-hash-table-lables )
+(defun make-hash-table-lables (lables)
 "@b(Описание:) make-hash-table-lables создает хеш-таблицу с:
 @begin(list)
  @item(ключами являющимися номерами колонок в таблице, содержащей данные для построения графиков (нумерация начинается с 0);)
@@ -241,15 +231,14 @@
     (3 \"a_1\" \"m/(s^2)\")))
 @end(code)
 "
-(defun make-hash-table-lables (lables)
   (let ((ht (make-hash-table)))
     (mapc #'(lambda (el) (setf (gethash (first el) ht)
 			       (second el)))
 	  lables)
     ht))
 
-@export
-@annot.doc:doc
+(export 'filter )
+(defun filter (table &optional (test #'(lambda (el)(if el t t))))
 "@b(Описание:) filter выполняет фильтрацию строк из таблицы по определенному критерию,
 задаваемому в функции test.
 
@@ -273,7 +262,6 @@
 	 #'(lambda(el)(not(= 5 (nth 0 el))))) => ((1 2 3) (2 3 4) (8 9 10))
 @end(code)
 " 
-(defun filter (table &optional (test #'(lambda (el)(if el t t))))
   (let ((rez nil))  
     (mapc #'(lambda (el)
 	      (if (funcall test el)
@@ -281,8 +269,34 @@
 	  table)
     rez))
 
-@export
-@annot.doc:doc
+(export 'make-plot )
+(defun make-plot (table			;
+		  ht-labels		;
+		  &key
+		    (x1y1 '(1 (2)))
+		    (x1y2 nil)
+		    (xrange  "[*:*]")
+		    (x2range "[*:*]")
+		    (yrange  "[*:*]")
+	            (y2range "[*:*]")
+		    (mxtics 5)
+		    (mytics 5)
+		    (tics "out")
+		    (tics-scale '(2 1))
+		    (terminal "pdfcairo")
+		    (terminal-size '(30 30))
+		    (terminal-unit "cm")
+		    (terminal-fontscale 1)
+		    (key "below")
+		    (output "gp")
+		    (output-path "")
+		    (title "GnuPlot Graph")
+		    (point-type *point-type-all*)
+		    (line-type -1)
+		    (line-width 3)
+		    (stepen 5)
+		    (point-number 0)
+		    )
 "@b(Описание:) make-plot
 
  @b(Переменые:)
@@ -316,34 +330,6 @@
  (with-output-to-string (out) (format out \"hello, world \") (format out \"~s\" (list 1 2 3))) 
 @end(code)
 "
-(defun make-plot (table			;
-		  ht-labels		;
-		  &key
-		    (x1y1 '(1 (2)))
-		    (x1y2 nil)
-		    (xrange  "[*:*]")
-		    (x2range "[*:*]")
-		    (yrange  "[*:*]")
-	            (y2range "[*:*]")
-		    (mxtics 5)
-		    (mytics 5)
-		    (tics "out")
-		    (tics-scale '(2 1))
-		    (terminal "pdfcairo")
-		    (terminal-size '(30 30))
-		    (terminal-unit "cm")
-		    (terminal-fontscale 1)
-		    (key "below")
-		    (output "gp")
-		    (output-path "")
-		    (title "GnuPlot Graph")
-		    (point-type *point-type-all*)
-		    (line-type -1)
-		    (line-width 3)
-		    (stepen 5)
-		    (point-number 0)
-		    )
-
   (let ((str-pt (list "" point-number))
 	(out (make-string-output-stream)) ; поток вывода результатов работы функции
         (fn-pdf (concatenate 'string output-path output ".pdf"))
@@ -415,11 +401,10 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-@annot.doc:doc
+(defun exclude-x-duplicates (lst-x-y)
 "@b(Описание:) функция @b(exclude-x-duplicates) исключет из списка lst-x-y,
 содержащего пары значений X и Y пары у которых значения X совпадают.
 "
-(defun exclude-x-duplicates (lst-x-y)
   (let ((rez nil))
     (dolist (x-y lst-x-y)
       (if (or (null rez)
@@ -430,8 +415,8 @@
 	    (push x-y rez))))
     (nreverse rez)))
 
-@export
-@annot.doc:doc
+(export 'stacked-chart-data )
+(defun stacked-chart-data (lst-1)
 "@b(Описание:) функция @b(stacked-chart-data) преобразует список, 
 состоящий из пар значений по оси X и Y к виду гафика с накоплением.
 
@@ -441,7 +426,6 @@
 => '((0 0) (1 0) (1 1) (2 1) (2 2) (3 2) (3 3) (4 3))
 @end(code)
 "
-(defun stacked-chart-data (lst-1)
   (let ((rez nil)
 	(lst (exclude-x-duplicates lst-1)))
       (map nil

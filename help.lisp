@@ -2,11 +2,10 @@
 
 (in-package #:gnuplot)
 
-(annot:enable-annot-syntax)
+(export 'help-set-grid)
 
-@export
-@annot.doc:doc
-" @b(Описание:) help-set-grid возврвщает помощь по команде gnuplot
+(defun help-set-grid (&optional (stream t))
+  " @b(Описание:) help-set-grid возврвщает помощь по команде gnuplot
 @begin[lang=gnuplot](code)
   set grid
 @end(code)
@@ -61,12 +60,12 @@
  partial box is drawn around the plot---see `set border`.
 @end(code)
 "
-(defun help-set-grid (&optional (stream t))
   (format stream "~a"  (documentation 'help-set-grid 'function)))
 
-@export
-@annot.doc:doc
-" @b(Описание:) help-set-polar выводит помощь по команде gnuplot
+(export 'help-set-polar)
+
+(defun help-set-polar (&optional (stream t))
+  " @b(Описание:) help-set-polar выводит помощь по команде gnuplot
 
 @begin[lang=gnuplot](code)
  set polar
@@ -125,12 +124,11 @@
  polar data plot (poldat.dem).
 @end(code)
 "
-(defun help-set-polar (&optional (stream t))
   (format stream "~a"  (documentation 'help-set-polar 'function)))
 
-@export
-@annot.doc:doc
-"@begin[lang=gnuplot](code)
+(export 'help-set-*range)
+(defun help-set-*range (&optional (stream t))
+  "@begin[lang=gnuplot](code)
  The `set xrange` command sets the horizontal range that will be displayed.
  A similar command exists for each of the other axes, as well as for the
  polar radius r and the parametric variables t, u, and v.
@@ -243,12 +241,12 @@ Press return for more:
 (set-*range \"y\" :no-reverse t :writeback t)
 @end(code)
 "
-(defun help-set-*range (&optional (stream t))
   (format stream "~a"  (documentation 'help-set-*range 'function)))
 
-@export
-@annot.doc:doc
-" @b(Описание:) help-set-*tics Помощь по командам gnuplot:
+(export 'help-set-*tics)
+
+(defun help-set-*tics (&optional (stream t))
+  " @b(Описание:) help-set-*tics Помощь по командам gnuplot:
  set xtics, set ytics, set ztics, set x2tics, set y2tics 
 
 @begin[lang=gnuplot](code)
@@ -427,13 +425,12 @@ Subtopics available for xtics:
     rangelimited      timedata
 @end(code)
 "
-(defun help-set-*tics (&optional (stream t))
   (format stream "~a"  (documentation 'help-set-*tics 'function)))
 
-@export
-@annot.doc:doc
-"
-@begin[lang=gnuplot](code)
+(export 'help-colorspec)
+
+(defun help-colorspec (&optional (stream t))
+  "@begin[lang=gnuplot](code)
  Many commands allow you to specify a linetype with an explicit color.
 
  Syntax:
@@ -489,13 +486,13 @@ Press return for more:
  3d line or surface. It also allows coloring 2D plots by palette values read
  from an extra column of data (not all 2D plot styles allow an extra column).
  There are two special color specifiers: `bgnd` for background color and `black`.
-@end(code)"
-(defun help-colorspec (&optional (stream t))
+@end(code)"  
   (format stream "~a"  (documentation 'help-colorspec 'function)))
 
-@export
-@annot.doc:doc
-"@begin[lang=gnuplot](code)
+(export 'help-set-key)
+
+(defun help-set-key (&optional (stream t))
+  "@begin[lang=gnuplot](code)
  The `set key` command enables a key (or legend) containing a title and a
  sample (line, point, box) for each plot in the graph. The key may be turned off
  by requesting `set key off` or `unset key`.  Individual key entries may be
@@ -597,14 +594,14 @@ Press return for more:
 Subtopics available for key:
     3D                autotitle         examples          fixed
     multiple          placement         samples           splot
-@end(code)"
-(defun help-set-key (&optional (stream t))
-    (format stream "~a"  (documentation 'help-set-key 'function)))
+@end(code)"  
+  (format stream "~a"  (documentation 'help-set-key 'function)))
 
 
-@export
-@annot.doc:doc
-"@begin[lang=gnuplot](code)
+(export 'help-set-m*tics)
+
+(defun help-set-m*tics (&optional (stream t))
+  "@begin[lang=gnuplot](code)
  Minor tic marks along the x axis are controlled by `set mxtics`.  They can be
  turned off with `unset mxtics`.  Similar commands control minor tics along
  the other axes.
@@ -654,13 +651,13 @@ Subtopics available for key:
  By default, minor tics are off for linear axes and on for logarithmic axes.
  They inherit the settings for `axis|border` and `{no}mirror` specified for
  the major tics.  Please see `set xtics` for information about these.
-@end(code)"
-(defun help-set-m*tics (&optional (stream t))
-    (format stream "~a"  (documentation 'help-set-m*tics 'function)))
+@end(code)"  
+  (format stream "~a"  (documentation 'help-set-m*tics 'function)))
 
-@export
-@annot.doc:doc
-"@begin[lang=gnuplot](code)
+
+(export 'help-set-title )
+(defun help-set-title (&optional (stream t))
+  "@begin[lang=gnuplot](code)
 help set title
  The `set title` command produces a plot title that is centered at the top of
  the plot.  `set title` is a special case of `set label`.
@@ -694,6 +691,4 @@ help set title
  the distinction between single- and double-quotes.
 @end(code)
 "
-(defun help-set-title (&optional (stream t))
-    (format stream "~a"  (documentation 'help-set-m*tics 'function)))
-
+  (format stream "~a"  (documentation 'help-set-m*tics 'function)))

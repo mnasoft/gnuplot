@@ -2,8 +2,6 @@
 
 (in-package #:gnuplot)
 
-(annot:enable-annot-syntax)
-
 (defun symbol-string (sym &key (print-case :downcase))
   (mnas-string:replace-all
    (mnas-string:replace-all 
@@ -24,8 +22,15 @@
 	     (when el (format stream " ~A" (symbol-string el :print-case :capitalize))))
        rest))
 
-@export
-@annot.doc:doc
+(export 'set-grid )
+(defun set-grid (&key
+		   (stream t)
+		   xtics  ytics  ztics
+                   x2tics y2tics rtics
+		   cbtics
+                   polar angle
+                   layer
+                   line-properties-major line-properties-minor)
 "@b(Описание:) set-grid
 
  @b(Пример использования:)
@@ -46,14 +51,6 @@
        show grid
 @end(code)
 "
-(defun set-grid (&key
-		   (stream t)
-		   xtics  ytics  ztics
-                   x2tics y2tics rtics
-		   cbtics
-                   polar angle
-                   layer
-                   line-properties-major line-properties-minor)
   (assert (member xtics '(nil :xtics :m-xtics :no-xtics :no-m-xtics )))
   (assert (member ytics '(nil :ytics :m-ytics :no-ytics :no-m-ytics )))
   (assert (member ztics '(nil :ztics :m-ztics :no-ztics :no-m-ztics )))
@@ -80,8 +77,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-@export
-@annot.doc:doc
+(export 'set-polar )
+(defun set-polar (&key (stream t))
 "@b(Описание:) set-polar устанавливает отрисовку в полярной системе координат.
 
  @b(Пример использования:)
@@ -107,16 +104,15 @@
        plot t*sin(t)
 @end(code)
 "
-(defun set-polar (&key (stream t)) (format stream "set polar"))
-
+ (format stream "set polar"))
 (defun unset-polar (&key (stream t)) (format stream "unset polar"))
 
 (defun show-polar (&key (stream t)) (format stream "show polar"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-@export
-@annot.doc:doc
+(export 'set-theta )
+(defun set-theta (&key (stream t) direction clock)
 " Polar coordinate plots are by default oriented such that theta = 0 is on the
  right side of the plot, with theta increasing as you proceed counterclockwise
  so that theta = 90 degrees is at the top.  `set theta` allows you to change
@@ -124,7 +120,6 @@
       set theta {right|top|left|bottom}
       set theta {clockwise|cw|counterclockwise|ccw}
  `unset theta` restores the default state `set theta right ccw`."
-(defun set-theta (&key (stream t) direction clock)
   (assert (member direction '(nil :right :top :left :bottom ) :test #'eq))
   (assert (member clock     '(nil :clockwise :cw :counterclockwise :ccw) :test #'eq))
   (format stream "set theta")
@@ -134,8 +129,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-@export
-@annot.doc:doc
+(export 'set-*range )
+(defun set-*range (axis &key (stream t) min max reverse writeback extend restore)
 "@b(Описание:) set-*range 
 
  @b(GNUPLOT Syntax:)
@@ -151,7 +146,6 @@
  (set-*range :x :min 1 :max 10)     => set xrange [1:10]
 @end(code)
 "
-(defun set-*range (axis &key (stream t) min max reverse writeback extend restore)
   (assert (member axis      '(:x :y :z :x2 :y2 :cb :r :t :u :v)))
   (assert (member reverse   '(nil :no-reverse :reverse)))
   (assert (member writeback '(nil :no-writeback :writeback)))
@@ -170,7 +164,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-@annot.doc:doc
+(defun valid-offset (offset)
 "@b(Описание:) valid-offset проверяет правильность фомата смещения подписи к засечкам.
 
  @b(Пример использования:)
@@ -198,7 +192,6 @@
        set xtics offset 0,graph 0.05
 @end(code)
 "
-(defun valid-offset (offset)
   (labels ((cons-with-key-number (key-lst)
 	     (lambda (var)
 	       (or (numberp var)
@@ -209,7 +202,7 @@
     (and (every (cons-with-key-number '(:first :second :graph :screen :character)) offset)
 	 (<= 2 (length offset) 3))))
 
-@annot.doc:doc
+(defun valid-position (position)
 "
 @begin[lang=text](code)
  This section describes placement of the primary, auto-generated key.
@@ -276,7 +269,6 @@
  <position>, etc.
 @end(code)
 "
-(defun valid-position (position)
   (labels ((cons-with-key-number (key-lst)
 	     (lambda (var)
 	       (or (numberp var)
@@ -287,7 +279,7 @@
     (and (every (cons-with-key-number '(:first :second :graph :screen :character)) position)
 	 (<= 2 (length position) 3))))
 
-@annot.doc:doc
+(defun valid-step-freq (step-freq)
 "@b(Описание:) valid-step-freq
 
  @b(Пример использования:)
@@ -299,14 +291,13 @@
  (valid-step-freq '(10.0 20.0 )) => T
 @end(code)
 "
-(defun valid-step-freq (step-freq)
   (cond
     ((numberp step-freq))        ;;;; <incr>
     ((and (consp step-freq)      ;;;; <start>, <incr> {,<end>}
 	  (every #'numberp step-freq)
 	  (<= 2 (length step-freq) 3)))))
 
-@annot.doc:doc
+(defun valid-labels (label)
 "@b(Описание:) valid-labels
 
  @b(Пример использования:)
@@ -314,14 +305,13 @@
   (valid-labels '((\"Pi\"  3.141592653589793d0) (\"e\"  2.718281828459045))) => T
 @end(code)
 "
-(defun valid-labels (label)
   (cond
     ((and (consp label)
 	  (every
 	   #'(lambda (el) (and (stringp (first el)) (numberp (second el))))
 	   label)))))
 
-@annot.doc:doc
+(defun valid-colorspec (colorspec)
 "@b(Описание:) valid-colorspec проверка на корректность спецификации цвета.
 
  @b(Пример использования:)
@@ -334,7 +324,6 @@
  (valid-colorspec '(45 65 20 30 20)) => NI
 @end(code)
 "
-(defun valid-colorspec (colorspec)
   (cond
     ((and (stringp  colorspec) (gethash colorspec *color-names*) T))
     ((and (integerp colorspec) (<= 0 #xffFFffFF)) T)
@@ -344,35 +333,44 @@
 	       (and (integerp el) (<= 0 el #xff)))
 	   colorspec)))))
 
-@annot.doc:doc
+(defun valid-font (font)
 "@b(Описание:) valid-font проверка на корректность шрифта.
 "
-(defun valid-font (font)
   (or (stringp font)
       (and (consp font)
 	   (stringp (first font))
 	   (numberp (second font)))))
 
-@annot.doc:doc
+(defun print-font (font &optional (stream t))
 "@b(Описание:) print-font
 "
-(defun print-font (font &optional (stream t))
   (when (stringp font) (format stream " font ~S" font))
   (when (and (consp font)
 	     (stringp (first font))
 	     (numberp (second font)))
     (format stream " font \"~A,~A\"" (first font) (second font))))
 
-@annot.doc:doc
+(defun print-textcolor (textcolor &optional (stream t))
 "@b(Описание:) print-textcolor
 "
-(defun print-textcolor (textcolor &optional (stream t))
   (when (stringp textcolor) (format stream " textcolor ~S" textcolor))
   (when (integerp textcolor) (format stream " textcolor \"0x~2,'0X\"" textcolor))
   (when (consp textcolor) (format stream " textcolor \"0x~{~2,'0X~}\"" textcolor)))
 
-@export
-@annot.doc:doc
+(export 'set-*tics )
+(defun set-*tics (axis
+		  &key
+		    (stream t) axis-border mirror in-out scale rotate
+		    offset
+		    justify add
+		    step-freq
+		    labels
+		    format font
+		    enhanced
+                    numeric-timedate-geographic
+		    rangelimited
+		    textcolor
+		    )
 "@b(Описание:) set-*tics выполняет формирование засечек и их подписей.
  
  @b(Пример использования:)
@@ -418,19 +416,6 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
        show xtics
 @end(code)
 "
-(defun set-*tics (axis
-		  &key
-		    (stream t) axis-border mirror in-out scale rotate
-		    offset
-		    justify add
-		    step-freq
-		    labels
-		    format font
-		    enhanced
-                    numeric-timedate-geographic
-		    rangelimited
-		    textcolor
-		    )
   (assert (member axis '(:x :y :z :x2 :y2 :cb)))
   (assert (member axis-border '(nil :axis :border)))
   (assert (member mirror      '(nil :no-mirror :mirror)))
@@ -492,8 +477,8 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
   (symbols->stream stream enhanced numeric-timedate-geographic rangelimited)
   (print-textcolor textcolor stream))
 
-@export
-@annot.doc:doc
+(export 'set-m*tics )
+(defun set-m*tics (axis &key (stream t) freq-default)
 "@b(Описание:) set-m*tics устанавливает количество делений для минорных засечек.
 
  @b(Переменые:)
@@ -514,7 +499,6 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
  (set-m*tics :y :freq-default 5) => set mytics 5
 @end(code)
 "
-(defun set-m*tics (axis &key (stream t) freq-default)
   (assert (member axis '(:x :y :z :x2 :y2 :r :t :cd)))
   (assert (or (member freq-default  '(nil :default))
 	      (integerp freq-default)))
@@ -523,8 +507,21 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
   (when (member freq-default  '(:default)) (symbols->stream stream freq-default))
   (when (integerp freq-default) (format stream " ~D" freq-default)))
 
-@export
-@annot.doc:doc
+(export 'set-key )
+(defun set-key ( &key
+		   (stream t) on-off default position
+		   hor-justification ver-justification
+                   vertical-horizontal |Left-Right|
+		   enhanced opaque reverse invert
+		   samplen spacing width height
+		   autotitle-columnheader
+		   title title-text title-enhanced title-justification
+
+		   font textcolor
+		   box box-line-style box-line-type box-line-width
+
+		   maxcols maxrows
+		   )
 "@b(Описание:) set-key
 
  @b(Пример использования:)
@@ -560,20 +557,6 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
        show key
 @end(code)
 "
-(defun set-key ( &key
-		   (stream t) on-off default position
-		   hor-justification ver-justification
-                   vertical-horizontal |Left-Right|
-		   enhanced opaque reverse invert
-		   samplen spacing width height
-		   autotitle-columnheader
-		   title title-text title-enhanced title-justification
-
-		   font textcolor
-		   box box-line-style box-line-type box-line-width
-
-		   maxcols maxrows
-		   )
   (assert (member on-off    '(nil :on :off)))
   (assert (member default   '(nil :default)))
   (assert (or (member position  '(nil :inside :outside :fixed :l-margin :r-margin :t-margin :b-margin))
@@ -657,8 +640,8 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-@export
-@annot.doc:doc
+(export 'set-title )
+(defun set-title (text offset font textcolor enhanced)
 "@b(Описание:) set-title
 
  @b(GNUPLOT Syntax:)
@@ -668,7 +651,6 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
        show title
 @end(code)
 "
-(defun set-title (text offset font textcolor enhanced)
   (assert text)
   (assert offset)
   (assert font)
@@ -683,8 +665,3 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
 "set output \"~A\"~%"
 "set title \"~A\"~%"
 "set tics ~A~%"
-
-
-
-
-

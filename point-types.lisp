@@ -2,16 +2,16 @@
 
 (in-package #:gnuplot)
 
-(annot:enable-annot-syntax)
+(export '*point-type-open*)
 
-@export
 (defparameter *point-type-open* '(1 2 3)
  "Содержит номера точек открытых типов:
 1 - +
 2 - x
 3 - *" )
 
-@export
+(export '*point-type-box*)
+
 (defparameter *point-type-box* '(8 4 6 10 12 14)
   "Содержит имена точек закрытых типов:
 8  - треугольник вершина вверх;
@@ -21,7 +21,8 @@
 12 - ромб;
 14 - пятиугольник")
 
-@export
+(export '*point-type-fill*)
+
 (defparameter *point-type-fill* '(9 5 7 11 13 15)
   "Содержит имена точек закрытых типов с заливкой:
 9  - залитый треугольник вершина вверх;
@@ -31,7 +32,8 @@
 13 - залитый ромб;
 15 - залитый пятиугольник")
 
-@export
+(export '*point-type-box-fill*)
+
 (defparameter *point-type-box-fill*
   (apply #'append
 	 (mapcar #'list *point-type-box* *point-type-fill*))
@@ -44,10 +46,10 @@
 пятиугольник,               залитый пятиугольник
 ")
 
-@export
-(defparameter *point-type-fill-box*
-  (apply #'append
-	 (mapcar #'list *point-type-fill* *point-type-box*))
+(export '*point-type-fill-box*)
+
+(defparameter *point-type-fill-box* (apply #'append
+					   (mapcar #'list *point-type-fill* *point-type-box*))
   "Содержит точки заклытых залитых и закрытых типов
 Залитые закрытые и  типы чередуются:
 залитый треугольник вершиной вверх, тр.в.в.;
@@ -57,7 +59,8 @@
 залитый пятиугольник,               пятиугольник
 ")
 
-@export
+(export '*point-type-all*)
+
 (defparameter *point-type-all* (append *point-type-box* *point-type-fill* *point-type-open*)
   "Содержит точки всех типов
 Точки идут в следующем порядке:

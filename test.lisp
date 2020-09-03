@@ -2,10 +2,6 @@
 
 (in-package #:gnuplot)
 
-(annot:enable-annot-syntax)
-
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter *test-tbl*

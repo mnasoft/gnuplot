@@ -2,8 +2,6 @@
 
 (in-package #:gnuplot)
 
-(annot:enable-annot-syntax)
-
 (defparameter *color-names-list*
   '(("white"              #xffffff)
     ("black"              #x000000)
@@ -117,7 +115,7 @@
     ("gray90"             #xe5e5e5)
     ("gray100"            #xffffff)))
 
-@export
+(export '*color-names*)
 (defparameter *color-names* (make-hash-table :test #'equal)
   "Поределяет соответствие между именем цвета и его RGB-значением.")
 
