@@ -119,4 +119,4 @@
 (defparameter *color-names* (make-hash-table :test #'equal)
   "Поределяет соответствие между именем цвета и его RGB-значением.")
 
-(mnas-hash-table:add-items *color-names* *color-names-list* 0 1)
+(mnas-hash-table:populate *color-names* *color-names-list* 0 1)
