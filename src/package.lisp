@@ -72,6 +72,4 @@
            stacked-chart-data
            filter))
 
-
 (in-package :gnuplot)
-
