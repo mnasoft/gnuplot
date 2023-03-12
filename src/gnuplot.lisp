@@ -1,6 +1,6 @@
 ;;;; gnuplot.lisp
 
-(in-package #:gnuplot)
+(in-package :gnuplot)
 
 (defparameter *const-names*
   (list "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "w")

@@ -1,6 +1,6 @@
-;;;; color-names.lisp
+;;;; ./src/color-names.lisp
 
-(in-package #:gnuplot)
+(in-package :gnuplot)
 
 (defparameter *color-names-list*
   '(("white"              #xffffff)
@@ -115,7 +115,6 @@
     ("gray90"             #xe5e5e5)
     ("gray100"            #xffffff)))
 
-(export '*color-names*)
 (defparameter *color-names* (make-hash-table :test #'equal)
   "Поределяет соответствие между именем цвета и его RGB-значением.")
 

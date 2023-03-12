@@ -1,6 +1,6 @@
 ;;;; set.lisp
 
-(in-package #:gnuplot)
+(in-package :gnuplot)
 
 (defun symbol-string (sym &key (print-case :downcase))
   (mnas-string:replace-all
@@ -22,7 +22,6 @@
 	     (when el (format stream " ~A" (symbol-string el :print-case :capitalize))))
        rest))
 
-(export 'set-grid )
 (defun set-grid (&key
 		   (stream t)
 		   xtics  ytics  ztics
@@ -77,9 +76,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(export 'set-polar )
 (defun set-polar (&key (stream t))
-"@b(Описание:) set-polar устанавливает отрисовку в полярной системе координат.
+  "@b(Описание:) set-polar устанавливает отрисовку в полярной системе координат.
 
  @b(Пример использования:)
 @begin[lang=lisp](code)
@@ -104,14 +102,16 @@
        plot t*sin(t)
 @end(code)
 "
- (format stream "set polar"))
-(defun unset-polar (&key (stream t)) (format stream "unset polar"))
+  (format stream "set polar"))
 
-(defun show-polar (&key (stream t)) (format stream "show polar"))
+(defun unset-polar (&key (stream t))
+  (format stream "unset polar"))
+
+(defun show-polar (&key (stream t))
+  (format stream "show polar"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(export 'set-theta )
 (defun set-theta (&key (stream t) direction clock)
 " Polar coordinate plots are by default oriented such that theta = 0 is on the
  right side of the plot, with theta increasing as you proceed counterclockwise
@@ -125,11 +125,12 @@
   (format stream "set theta")
   (symbols->stream stream direction clock))
 
-(set-theta :direction :right :clock :counterclockwise)
+(defun unset-theta (&key (stream t))
+  "Restores the default state `set theta right ccw."
+  (format stream "unset theta"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(export 'set-*range )
 (defun set-*range (axis &key (stream t) min max reverse writeback extend restore)
 "@b(Описание:) set-*range 
 
@@ -357,7 +358,6 @@
   (when (integerp textcolor) (format stream " textcolor \"0x~2,'0X\"" textcolor))
   (when (consp textcolor) (format stream " textcolor \"0x~{~2,'0X~}\"" textcolor)))
 
-(export 'set-*tics )
 (defun set-*tics (axis
 		  &key
 		    (stream t) axis-border mirror in-out scale rotate
@@ -477,7 +477,6 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
   (symbols->stream stream enhanced numeric-timedate-geographic rangelimited)
   (print-textcolor textcolor stream))
 
-(export 'set-m*tics )
 (defun set-m*tics (axis &key (stream t) freq-default)
 "@b(Описание:) set-m*tics устанавливает количество делений для минорных засечек.
 
@@ -507,7 +506,6 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
   (when (member freq-default  '(:default)) (symbols->stream stream freq-default))
   (when (integerp freq-default) (format stream " ~D" freq-default)))
 
-(export 'set-key )
 (defun set-key ( &key
 		   (stream t) on-off default position
 		   hor-justification ver-justification
@@ -640,7 +638,6 @@ set xtics out font \"Times New Roman,15\" textcolor \"0x009691\"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(export 'set-title )
 (defun set-title (text offset font textcolor enhanced)
 "@b(Описание:) set-title
 

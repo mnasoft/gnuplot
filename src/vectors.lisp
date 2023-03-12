@@ -1,9 +1,6 @@
 ;;;;vectors.lisp
 
-(in-package #:gnuplot)
-
-(export '<point>)
-(export '<point>-coords)
+(in-package :gnuplot)
 
 (defclass <point> () 
   ((coords :accessor <point>-coords :initform  '(0.0 0.0 0.0) :initarg :coords))
@@ -15,7 +12,6 @@
 (defmethod print-object ((pt <point>) s)
   (format s "~{~A~^ ~}" (<point>-coords pt)))
 
-(export 'polar )
 (defmethod polar ((p <point>) angle distance)
   (let ((pt (make-instance
 	     '<point>
@@ -26,28 +22,13 @@
 	      (third  (<point>-coords p))))))
     pt))
 
-
-(export '<line>)
-(export '<line>-start)
-(export '<line>-end)
-
 (defclass <line> ()
   ((start :accessor <line>-start :initform  (make-instance '<point> :coords '(0.0     0.0 0.0)) :initarg :start)
    (end   :accessor <line>-end   :initform  (make-instance '<point> :coords '(100.0 100.0 0.0)) :initarg :end  )))
 
-(export '<circle>)
-(export '<circle>-center)
-(export '<circle>-radius)
-
 (defclass <circle> ()
   ((center :accessor <circle>-center :initform  (make-instance '<point> :coords '(0.0 0.0 0.0)) :initarg :center)
    (radius :accessor <circle>-radius :initform  1.0                                             :initarg :radius)))
-
-(export '<arc>)
-(export '<arc>-center)
-(export '<arc>-radius)
-(export '<arc>-start-angle)
-(export '<arc>-end-angle)
 
 (defclass <arc> ()
   ((center      :accessor <arc>-center      :initform  (make-instance '<point> :coords '(0.0 0.0 0.0)) :initarg :center)
@@ -55,19 +36,13 @@
    (start-angle :accessor <arc>-start-angle :initform  0.0            :initarg :start-angle)
    (end-angle   :accessor <arc>-end-angle   :initform  pi             :initarg :end-angle)))
 
-
-(export '<gnuplot-vector-printer>)
-(export '<gnuplot-vector-printer>-stream)
-
 (defclass <gnuplot-vector-printer> ()
   ((stream :accessor <gnuplot-vector-printer>-stream
 	   :initform (make-string-output-stream) )))
 
-(export 'out )
 (defgeneric out (object printer)
  (:documentation "@b(Описание:) out выводит объект object на принтер printer."))
 
-(export 'out )
 (defmethod out ((l <line>) (pr <gnuplot-vector-printer>))
   (format (<gnuplot-vector-printer>-stream pr)
 	  "~{~A~^ ~} ~{~A~^ ~}~%"
@@ -75,7 +50,6 @@
 	  (mapcar #'(lambda (el) (coerce el 'single-float))
 		  (mapcar #'- (<point>-coords (<line>-end l)) (<point>-coords(<line>-start l))))))
 
-(export 'out )
 (defmethod out ((ar <arc>) (pr <gnuplot-vector-printer>))
   (let* ((a-r (<arc>-radius ar))
 	 (a-s (<arc>-start-angle ar))
@@ -93,7 +67,6 @@
 	     (out (make-instance '<line> :start p-s :end p-e) pr))
 	 pts (cdr pts))))
 
-(export 'out )
 (defmethod out ((ar <circle>) (pr <gnuplot-vector-printer>))
   (let* ((steps 50)
 	(pts (loop :for i :from 0 :to steps
@@ -106,11 +79,9 @@
 	     (out (make-instance '<line> :start p-s :end p-e) pr))
 	 pts (cdr pts))))
 
-(export 'out-vectors-to-file )
 (defun out-vectors-to-file (f-name sequence)
-"@b(Описание:) out-vectors-to-file выполняет вывод объектов, находящихся в 
-последовательности sequence в файл с именем f-name.
-"
+  "@b(Описание:) out-vectors-to-file выполняет вывод объектов,
+   находящихся в последовательности sequence в файл с именем f-name."
   (assert 
    (every #'(lambda (el)
 	      (or (eq (class-of el) (find-class '<line>))

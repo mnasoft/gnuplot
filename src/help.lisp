@@ -1,6 +1,6 @@
 ;;;; help.lisp
 
-(in-package #:gnuplot)
+(in-package :gnuplot)
 
 (export 'help-set-grid)
 
