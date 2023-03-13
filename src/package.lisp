@@ -24,8 +24,8 @@
            <circle>-center
            <circle>-radius
            )
-  (:export <gnuplot-vector-printer>
-           <gnuplot-vector-printer>-stream
+  (:export <gnuplot-printer>
+           <gnuplot-printer>-stream
            )
   (:export out
            out-vectors-to-file

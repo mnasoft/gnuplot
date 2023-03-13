@@ -97,11 +97,11 @@
     (make-instance '<circle>
 		   :center (make-instance '<point>
 					  :coords '(10.0 50.0 0.0)) :radius 10.0))
-  (defparameter *s* (make-instance '<gnuplot-vector-printer>))
+  (defparameter *s* (make-instance '<gnuplot-printer>))
   (out  *ar* *s*)
   (out  *cr* *s*)
   (out *l* *s*)
 
-  (format t "~A"(get-output-stream-string (<gnuplot-vector-printer>-stream *s*)))
+  (format t "~A"(get-output-stream-string (<gnuplot-printer>-stream *s*)))
   (out-vectors-to-file "~/data.data" (list *l* *l* *l* *ar* *cr*))
   )

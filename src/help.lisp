@@ -2,8 +2,6 @@
 
 (in-package :gnuplot)
 
-(export 'help-set-grid)
-
 (defun help-set-grid (&optional (stream t))
   " @b(Описание:) help-set-grid возврвщает помощь по команде gnuplot
 @begin[lang=gnuplot](code)
@@ -61,8 +59,6 @@
 @end(code)
 "
   (format stream "~a"  (documentation 'help-set-grid 'function)))
-
-(export 'help-set-polar)
 
 (defun help-set-polar (&optional (stream t))
   " @b(Описание:) help-set-polar выводит помощь по команде gnuplot
@@ -126,7 +122,6 @@
 "
   (format stream "~a"  (documentation 'help-set-polar 'function)))
 
-(export 'help-set-*range)
 (defun help-set-*range (&optional (stream t))
   "@begin[lang=gnuplot](code)
  The `set xrange` command sets the horizontal range that will be displayed.
@@ -242,8 +237,6 @@ Press return for more:
 @end(code)
 "
   (format stream "~a"  (documentation 'help-set-*range 'function)))
-
-(export 'help-set-*tics)
 
 (defun help-set-*tics (&optional (stream t))
   " @b(Описание:) help-set-*tics Помощь по командам gnuplot:
@@ -427,8 +420,6 @@ Subtopics available for xtics:
 "
   (format stream "~a"  (documentation 'help-set-*tics 'function)))
 
-(export 'help-colorspec)
-
 (defun help-colorspec (&optional (stream t))
   "@begin[lang=gnuplot](code)
  Many commands allow you to specify a linetype with an explicit color.
@@ -488,8 +479,6 @@ Press return for more:
  There are two special color specifiers: `bgnd` for background color and `black`.
 @end(code)"  
   (format stream "~a"  (documentation 'help-colorspec 'function)))
-
-(export 'help-set-key)
 
 (defun help-set-key (&optional (stream t))
   "@begin[lang=gnuplot](code)
@@ -597,9 +586,6 @@ Subtopics available for key:
 @end(code)"  
   (format stream "~a"  (documentation 'help-set-key 'function)))
 
-
-(export 'help-set-m*tics)
-
 (defun help-set-m*tics (&optional (stream t))
   "@begin[lang=gnuplot](code)
  Minor tic marks along the x axis are controlled by `set mxtics`.  They can be
@@ -654,8 +640,6 @@ Subtopics available for key:
 @end(code)"  
   (format stream "~a"  (documentation 'help-set-m*tics 'function)))
 
-
-(export 'help-set-title )
 (defun help-set-title (&optional (stream t))
   "@begin[lang=gnuplot](code)
 help set title

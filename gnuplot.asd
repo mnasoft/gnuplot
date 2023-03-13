@@ -16,6 +16,11 @@
 	                     (:file "color-names")
 	                     (:file "set") 
                              (:file "help")
-                             (:file "vectors") 	       
+                             (:file "vectors")
                              #+ni (:file "test")
+                             ))
+               (:module "src/methods"
+                :depends-on ("src")
+                :serial nil
+                :components ((:file "out") 	       
                              ))))
