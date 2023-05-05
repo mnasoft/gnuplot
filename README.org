@@ -48,10 +48,15 @@
 (gnuplot:make-plot *test-tbl* *test-hash-lables* :x1y1 '(0 (2 3)) :x1y2 '(0 (1 4)))
 #+END_SRC
 
+#+RESULTS:
+: #P"d:/home/_namatv/PRG/msys64/home/namatv/quicklisp/local-projects/clisp/gnuplot/gp.gnuplot", #P"d:/home/_namatv/PRG/msys64/home/namatv/quicklisp/local-projects/clisp/gnuplot/gp.txt"
+
 #+BEGIN_SRC shell
 cd 
 gnuplot -c "gp.gnuplot"
 #+END_SRC
+
+#+RESULTS:
 
 * Команды set 
 
